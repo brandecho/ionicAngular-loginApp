@@ -1,12 +1,19 @@
-ionic-telerik-login-example
-===========================
-App example using Telerik and Ionic Framework.
+# My VIP Clubs
 
-Just clone the repository on Telerik AppBuilder and run it :)
+**The hookup. Recognized before you walk in the door.**
 
-Features:
+A members app that gives people VIP access to venues they normally couldn't get
+into — and lets those venues recognize a VIP *before* they reach the door
+(via GPS + a push notification to the venue manager). No calling a manager,
+no waiting in line.
 
-1. Ionic Side Menu Navigation.
-2. Initial Login Screen.
-3. Different Navigation Templates.
-4. Angular Routing
+The application lives in [`myvipclubs/`](./myvipclubs) and is built with
+**Ionic 8 + Angular 20** (standalone components). See
+[`myvipclubs/README.md`](./myvipclubs/README.md) for the full feature list, the
+recognition flow, and how to run it.
+
+```bash
+cd myvipclubs
+npm install
+npx ng serve --port 8100   # open http://localhost:8100
+```
