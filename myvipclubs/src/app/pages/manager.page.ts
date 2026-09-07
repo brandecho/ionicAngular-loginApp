@@ -1,17 +1,33 @@
 import { Component, Input, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
-import {
-  IonContent,
-  IonIcon,
-} from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonButtons, IonBackButton, IonHeader, IonToolbar } from '@ionic/angular/standalone';
 import { VipService } from '../vip.service';
 import { TierBadgeComponent } from '../components/tier-badge.component';
 
 @Component({
   selector: 'app-manager',
   standalone: true,
-  imports: [CurrencyPipe, IonContent, IonIcon, TierBadgeComponent],
+  imports: [
+    CurrencyPipe,
+    IonContent,
+    IonIcon,
+    IonButtons,
+    IonBackButton,
+    IonHeader,
+    IonToolbar,
+    TierBadgeComponent,
+  ],
   template: `
+    <ion-header class="ion-no-border mgr-head">
+      <ion-toolbar>
+        @if (showBack()) {
+          <ion-buttons slot="start">
+            <ion-back-button [defaultHref]="backHref()"></ion-back-button>
+          </ion-buttons>
+        }
+      </ion-toolbar>
+    </ion-header>
+
     <ion-content [fullscreen]="true" class="mgr">
       <div class="page">
         <div class="topbar">
@@ -24,18 +40,18 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
           {{ welcomed() ? 'Guest welcomed' : 'VIP arriving now' }}
         </div>
 
-        <div class="card" [style.--tier-color]="vip.currentTier().color">
+        <div class="card" [style.--tier-color]="tier().color">
           <div class="who">
-            <div class="photo">{{ vip.member().photo }}</div>
+            <div class="photo">{{ member().photo }}</div>
             <div class="id">
-              <h1>{{ vip.member().firstName }} {{ vip.member().lastName }}</h1>
-              <app-tier-badge [tier]="vip.currentTier()"></app-tier-badge>
+              <h1>{{ member().firstName }} {{ member().lastName }}</h1>
+              <app-tier-badge [tier]="tier()"></app-tier-badge>
             </div>
           </div>
 
           <div class="facts">
             <div class="fact">
-              <span class="f-val">{{ vip.lifetimeValue() | currency: 'USD' : 'symbol' : '1.0-0' }}</span>
+              <span class="f-val">{{ lifetimeValue() | currency: 'USD' : 'symbol' : '1.0-0' }}</span>
               <span class="f-lab">Lifetime</span>
             </div>
             <div class="fact">
@@ -53,7 +69,7 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
           }
         </div>
 
-        <div class="section">How to take care of {{ vip.member().firstName }}</div>
+        <div class="section">How to take care of {{ member().firstName }}</div>
         <div class="prefs">
           <div class="pref"><ion-icon name="wine-outline"></ion-icon><span><em>Go-to drink</em>{{ prefs().favoriteDrink }}</span></div>
           <div class="pref"><ion-icon name="sparkles-outline"></ion-icon><span><em>Celebration</em>{{ prefs().secondDrink }}</span></div>
@@ -68,13 +84,13 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
         @if (!welcomed()) {
           <button class="welcome" (click)="welcome()">
             <ion-icon name="checkmark-outline"></ion-icon>
-            Welcome {{ vip.member().firstName }}
+            Welcome {{ member().firstName }}
           </button>
         } @else {
           <div class="welcomed-box">
             <ion-icon name="checkmark-circle"></ion-icon>
             <div>
-              <strong>{{ vip.member().firstName }} has been welcomed</strong>
+              <strong>{{ member().firstName }} has been welcomed</strong>
               <p>The host, bar and floor have been notified. No line, no wait.</p>
             </div>
           </div>
@@ -87,7 +103,8 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
   styles: [
     `
       .mgr { --background: linear-gradient(180deg, #0c0c13, #08080d); }
-      .page { padding: 18px; max-width: 560px; margin: 0 auto; }
+      .mgr-head ion-toolbar { --background: transparent; --border-color: transparent; }
+      .page { padding: 0 18px 18px; max-width: 560px; margin: 0 auto; }
       .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
       .brand { display: inline-flex; align-items: center; gap: 7px; color: var(--vip-gold); font-weight: 800; font-size: 15px; }
       .role { color: var(--vip-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
@@ -145,20 +162,46 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
 export class ManagerPage {
   vip = inject(VipService);
 
+  private memberId = signal<string>('m1');
   private venueId = signal<string>('');
   welcomed = signal(false);
 
   // member id from the route path (/manager/:id)
-  @Input() id?: string;
+  @Input() set id(value: string | undefined) {
+    if (value) this.memberId.set(value);
+  }
   // venue from ?venue=
   @Input() set venue(v: string | undefined) {
     if (v) this.venueId.set(v);
   }
 
-  prefs = computed(() => this.vip.member().preferences);
-  venueName = computed(() => this.vip.venueById(this.venueId())?.name ?? this.vip.managerAlert()?.venueName ?? '');
-  dist = computed(() => this.vip.venueById(this.venueId())?.distanceMiles ?? this.vip.managerAlert()?.distanceMiles ?? 0.3);
-  eta = computed(() => this.vip.managerAlert()?.etaMinutes ?? Math.max(1, Math.round(this.dist() * 4)));
+  member = computed(() => this.vip.memberById(this.memberId()) ?? this.vip.member());
+  tier = computed(() => this.vip.tierForMember(this.member()));
+  lifetimeValue = computed(() => this.vip.lifetimeValueOf(this.member()));
+  prefs = computed(() => this.member().preferences);
+
+  venueName = computed(
+    () => this.vip.venueById(this.venueId())?.name ?? this.vip.managerAlert()?.venueName ?? '',
+  );
+  dist = computed(() => {
+    const m = this.member();
+    if (m.arriving?.venueId === this.venueId()) {
+      return +(m.arriving.etaMinutes / 4).toFixed(1);
+    }
+    return (
+      this.vip.venueById(this.venueId())?.distanceMiles ??
+      this.vip.managerAlert()?.distanceMiles ??
+      0.3
+    );
+  });
+  eta = computed(() => {
+    const m = this.member();
+    if (m.arriving?.venueId === this.venueId()) return m.arriving.etaMinutes;
+    return this.vip.managerAlert()?.etaMinutes ?? Math.max(1, Math.round(this.dist() * 4));
+  });
+
+  showBack = computed(() => !!this.venueId());
+  backHref = computed(() => (this.venueId() ? `/venue-portal/${this.venueId()}` : '/tabs/home'));
 
   welcome(): void {
     if (this.venueId()) this.vip.markWelcomed(this.venueId());

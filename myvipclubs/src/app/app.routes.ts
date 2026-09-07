@@ -50,5 +50,15 @@ export const routes: Routes = [
     path: 'manager/:id',
     loadComponent: () => import('./pages/manager.page').then((m) => m.ManagerPage),
   },
+  {
+    // Venue-side portal (separate persona — no member auth).
+    path: 'venue-portal',
+    loadComponent: () => import('./pages/venue-portal.page').then((m) => m.VenuePortalPage),
+  },
+  {
+    path: 'venue-portal/:id',
+    loadComponent: () =>
+      import('./pages/venue-dashboard.page').then((m) => m.VenueDashboardPage),
+  },
   { path: '**', redirectTo: 'login' },
 ];

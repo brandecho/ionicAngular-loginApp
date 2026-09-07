@@ -25,6 +25,8 @@ export interface Venue {
   id: string;
   name: string;
   type: 'Nightclub' | 'Lounge' | 'Rooftop' | 'Restaurant' | 'Speakeasy' | 'Members Club';
+  /** Street address — geocoded to lat/lng via GeocodingService. */
+  address: string;
   neighborhood: string;
   city: string;
   image: string; // emoji stand-in for artwork
@@ -41,12 +43,15 @@ export interface Venue {
   geofenceRadius?: number;
 }
 
-export type RequestStatus = 'requested' | 'in_review' | 'approved';
+export type RequestStatus = 'requested' | 'in_review' | 'approved' | 'declined';
 
 export interface VenueRequest {
+  memberId: string;
   venueId: string;
   status: RequestStatus;
   requestedAt: number;
+  /** Optional note the member adds when requesting the hookup. */
+  note?: string;
 }
 
 export interface MemberPreferences {
@@ -73,6 +78,8 @@ export interface Member {
   preferences: MemberPreferences;
   favoriteVenueIds: string[];
   favoriteStaffIds: string[];
+  /** Set when the member is currently inbound to a venue (venue-side "tonight"). */
+  arriving?: { venueId: string; etaMinutes: number };
 }
 
 export interface CheckInEvent {

@@ -1,4 +1,4 @@
-import { Member, StaffMember, Tier, Venue } from './models';
+import { Member, StaffMember, Tier, Venue, VenueRequest } from './models';
 
 export const TIERS: Tier[] = [
   {
@@ -47,6 +47,7 @@ export const VENUES: Venue[] = [
   {
     id: 'v1',
     name: 'Skyline 88',
+    address: '88 SE 3rd Ave, Miami, FL 33131',
     type: 'Rooftop',
     neighborhood: 'Downtown',
     city: 'Miami',
@@ -62,6 +63,7 @@ export const VENUES: Venue[] = [
   {
     id: 'v2',
     name: 'Velvet Room',
+    address: '1235 Washington Ave, Miami Beach, FL 33139',
     type: 'Nightclub',
     neighborhood: 'South Beach',
     city: 'Miami',
@@ -77,6 +79,7 @@ export const VENUES: Venue[] = [
   {
     id: 'v3',
     name: 'The Cellar',
+    address: '167 NW 23rd St, Miami, FL 33127',
     type: 'Speakeasy',
     neighborhood: 'Wynwood',
     city: 'Miami',
@@ -92,6 +95,7 @@ export const VENUES: Venue[] = [
   {
     id: 'v4',
     name: 'Marée',
+    address: '1425 Brickell Ave, Miami, FL 33131',
     type: 'Restaurant',
     neighborhood: 'Brickell',
     city: 'Miami',
@@ -107,6 +111,7 @@ export const VENUES: Venue[] = [
   {
     id: 'v5',
     name: 'Noir Society',
+    address: '140 NE 39th St, Miami, FL 33137',
     type: 'Members Club',
     neighborhood: 'Design District',
     city: 'Miami',
@@ -122,6 +127,7 @@ export const VENUES: Venue[] = [
   {
     id: 'v6',
     name: 'Azure Lounge',
+    address: '9700 Collins Ave, Bal Harbour, FL 33154',
     type: 'Lounge',
     neighborhood: 'Bal Harbour',
     city: 'Miami',
@@ -137,6 +143,7 @@ export const VENUES: Venue[] = [
   {
     id: 'v7',
     name: 'Prohibition 21',
+    address: '1421 SW 8th St, Miami, FL 33135',
     type: 'Speakeasy',
     neighborhood: 'Little Havana',
     city: 'Miami',
@@ -152,6 +159,7 @@ export const VENUES: Venue[] = [
   {
     id: 'v8',
     name: 'Solstice',
+    address: '1445 Collins Ave, Miami Beach, FL 33139',
     type: 'Nightclub',
     neighborhood: 'South Beach',
     city: 'Miami',
@@ -237,3 +245,138 @@ export const CURRENT_MEMBER: Member = {
   favoriteVenueIds: ['v1', 'v2', 'v3'],
   favoriteStaffIds: ['s1', 's2', 's3', 's4'],
 };
+
+/**
+ * The full member base. `CURRENT_MEMBER` (m1) is the signed-in member; the rest
+ * populate the venue-side rosters and "expected tonight" lists. A member's
+ * `favoriteVenueIds` doubles as the set of venues they have access to.
+ */
+export const MEMBERS: Member[] = [
+  CURRENT_MEMBER,
+  {
+    id: 'm2',
+    firstName: 'Jordan',
+    lastName: 'Blake',
+    email: 'jordan.blake@example.com',
+    memberSince: 2020,
+    photo: '🎩',
+    totalSpent: 49200,
+    totalTips: 8600,
+    visitsThisYear: 41,
+    preferences: {
+      favoriteDrink: 'Macallan 18, neat',
+      secondDrink: 'Krug Grande Cuvée',
+      spirit: 'Single malt scotch',
+      seating: 'Private booth, center of the room',
+      music: 'Live jazz / soul',
+      allergies: 'None',
+      celebration: 'Closing big deals',
+      notes: 'Big spender, loves being seen. Keep the bottle coming.',
+    },
+    favoriteVenueIds: ['v1', 'v2', 'v8'],
+    favoriteStaffIds: ['s2', 's3'],
+    arriving: { venueId: 'v1', etaMinutes: 3 },
+  },
+  {
+    id: 'm3',
+    firstName: 'Riley',
+    lastName: 'Chen',
+    email: 'riley.chen@example.com',
+    memberSince: 2023,
+    photo: '🕶️',
+    totalSpent: 6800,
+    totalTips: 1400,
+    visitsThisYear: 12,
+    preferences: {
+      favoriteDrink: 'Espresso Martini',
+      secondDrink: 'Veuve Clicquot',
+      spirit: 'Vodka',
+      seating: 'High-top near the DJ',
+      music: 'Techno / house',
+      allergies: 'Peanuts',
+      celebration: 'Birthday — March 2',
+      notes: 'Comes with a group of 4-6. Loves the energy up front.',
+    },
+    favoriteVenueIds: ['v1', 'v3'],
+    favoriteStaffIds: ['s4'],
+  },
+  {
+    id: 'm4',
+    firstName: 'Sam',
+    lastName: 'Okafor',
+    email: 'sam.okafor@example.com',
+    memberSince: 2021,
+    photo: '👑',
+    totalSpent: 17600,
+    totalTips: 2900,
+    visitsThisYear: 23,
+    preferences: {
+      favoriteDrink: 'Negroni',
+      secondDrink: 'Dom Pérignon Rosé',
+      spirit: 'Gin',
+      seating: 'Quiet corner, good for conversation',
+      music: 'Afrobeats / amapiano',
+      allergies: 'Gluten',
+      celebration: 'Anniversary — Nov 20',
+      notes: 'Prefers gluten-free menu. Discreet service.',
+    },
+    favoriteVenueIds: ['v2', 'v5'],
+    favoriteStaffIds: ['s1'],
+    arriving: { venueId: 'v2', etaMinutes: 7 },
+  },
+  {
+    id: 'm5',
+    firstName: 'Toni',
+    lastName: 'Alvarez',
+    email: 'toni.alvarez@example.com',
+    memberSince: 2024,
+    photo: '💃',
+    totalSpent: 1900,
+    totalTips: 320,
+    visitsThisYear: 5,
+    preferences: {
+      favoriteDrink: 'Aperol Spritz',
+      secondDrink: 'Prosecco',
+      spirit: 'Tequila blanco',
+      seating: 'Patio / outdoors',
+      music: 'Latin / reggaeton',
+      allergies: 'None',
+      celebration: 'Just getting started',
+      notes: 'New member, building up. Friendly welcome goes a long way.',
+    },
+    favoriteVenueIds: ['v1'],
+    favoriteStaffIds: ['s5'],
+  },
+  {
+    id: 'm6',
+    firstName: 'Casey',
+    lastName: 'Nguyen',
+    email: 'casey.nguyen@example.com',
+    memberSince: 2019,
+    photo: '🖤',
+    totalSpent: 108000,
+    totalTips: 21000,
+    visitsThisYear: 58,
+    preferences: {
+      favoriteDrink: 'Louis XIII, neat',
+      secondDrink: 'Cristal',
+      spirit: 'Cognac',
+      seating: 'The best table in the house — always',
+      music: 'Whatever sets the mood',
+      allergies: 'Shellfish',
+      celebration: 'Every night is a celebration',
+      notes: 'Top-tier Noir. Venue buyouts. Notify GM personally on arrival.',
+    },
+    favoriteVenueIds: ['v2', 'v5', 'v8'],
+    favoriteStaffIds: ['s2'],
+    arriving: { venueId: 'v8', etaMinutes: 11 },
+  },
+];
+
+/** Pre-seeded access requests from other members, awaiting venue approval. */
+export const SEED_REQUESTS: VenueRequest[] = [
+  { memberId: 'm3', venueId: 'v2', status: 'requested', requestedAt: Date.now() - 3600_000, note: 'Would love in for my birthday.' },
+  { memberId: 'm5', venueId: 'v2', status: 'requested', requestedAt: Date.now() - 7200_000 },
+  { memberId: 'm2', venueId: 'v5', status: 'requested', requestedAt: Date.now() - 1800_000, note: 'Interested in a membership.' },
+  { memberId: 'm4', venueId: 'v1', status: 'requested', requestedAt: Date.now() - 900_000 },
+];

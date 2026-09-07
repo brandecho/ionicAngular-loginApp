@@ -9,9 +9,11 @@ import {
   IonBackButton,
   IonButton,
   IonIcon,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { VipService } from '../vip.service';
 import { TierBadgeComponent } from '../components/tier-badge.component';
+import { Venue } from '../models';
 
 @Component({
   selector: 'app-venue-detail',
@@ -52,6 +54,12 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
           <span class="type">{{ v.type }} · {{ v.neighborhood }}, {{ v.city }}</span>
           <p class="vibe">{{ v.vibe }}</p>
 
+          <button class="addr" (click)="directions(v)">
+            <ion-icon name="location-outline"></ion-icon>
+            <span class="addr-txt">{{ v.address }}</span>
+            <span class="dirs"><ion-icon name="navigate-outline"></ion-icon> Directions</span>
+          </button>
+
           <div class="tags">
             @if (tier(v.memberTierRequired); as t) {
               <app-tier-badge [tier]="t"></app-tier-badge>
@@ -65,6 +73,10 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
             <button class="arrive" (click)="checkIn()">
               <ion-icon name="navigate-outline"></ion-icon>
               I'm here — notify {{ v.name }}
+            </button>
+            <button class="table" (click)="requestTable(v)">
+              <ion-icon name="restaurant-outline"></ion-icon>
+              Request a table
             </button>
           }
 
@@ -111,6 +123,22 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
         box-shadow: 0 12px 34px rgba(212, 175, 55, 0.30);
       }
       .arrive ion-icon { font-size: 20px; }
+      .addr {
+        width: 100%; text-align: left; cursor: pointer; margin-top: 4px;
+        display: flex; align-items: center; gap: 10px;
+        background: var(--vip-surface); border: 1px solid var(--vip-border);
+        border-radius: 14px; padding: 12px 14px; color: var(--vip-text);
+      }
+      .addr > ion-icon { font-size: 18px; color: var(--vip-gold); flex-shrink: 0; }
+      .addr-txt { flex: 1; font-size: 13.5px; }
+      .dirs { display: inline-flex; align-items: center; gap: 4px; color: var(--vip-gold); font-size: 12.5px; font-weight: 700; }
+      .dirs ion-icon { font-size: 14px; }
+      .table {
+        width: 100%; margin-top: 12px; border: 1px solid color-mix(in srgb, var(--vip-gold) 45%, transparent);
+        background: var(--vip-gold-tint); color: var(--vip-gold-soft); border-radius: 16px; padding: 15px;
+        font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+      }
+      .table ion-icon { font-size: 19px; }
       .person { display: flex; align-items: center; gap: 12px; background: var(--vip-surface); border: 1px solid var(--vip-border); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; }
       .avatar { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #14131b; background: linear-gradient(160deg, #d4af37, #9c7c22); }
       .pname { display: block; color: #fff; font-weight: 700; font-size: 15px; }
@@ -122,6 +150,7 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
 export class VenueDetailPage {
   private vip = inject(VipService);
   private router = inject(Router);
+  private toast = inject(ToastController);
 
   private _id = signal<string>('');
   @Input() set id(value: string) {
@@ -142,5 +171,22 @@ export class VenueDetailPage {
 
   checkIn(): void {
     this.router.navigate(['/checkin'], { queryParams: { venue: this._id() } });
+  }
+
+  /** Open the venue's location in Google Maps (works on web and native). */
+  directions(v: Venue): void {
+    const dest = v.lat && v.lng ? `${v.lat},${v.lng}` : encodeURIComponent(v.address);
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${dest}`;
+    window.open(url, '_blank');
+  }
+
+  async requestTable(v: Venue): Promise<void> {
+    const t = await this.toast.create({
+      message: `Table request sent to ${v.name}. Your host will confirm shortly.`,
+      duration: 2400,
+      position: 'top',
+      color: 'primary',
+    });
+    await t.present();
   }
 }

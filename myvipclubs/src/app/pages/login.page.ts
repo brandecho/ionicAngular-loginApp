@@ -53,6 +53,11 @@ import { VipService } from '../vip.service';
           Enter the club
         </ion-button>
 
+        <button class="venue-link" (click)="venuePortal()">
+          <ion-icon name="business-outline"></ion-icon>
+          I run a venue — open the venue portal
+        </button>
+
         <ion-text class="hint">
           <p>Demo: tap “Enter the club” to sign in as Alex Morgan.</p>
         </ion-text>
@@ -128,6 +133,26 @@ import { VipService } from '../vip.service';
         font-weight: 700;
         height: 52px;
       }
+      .venue-link {
+        width: 100%;
+        margin-top: 14px;
+        background: transparent;
+        border: 1px solid var(--vip-border);
+        color: var(--vip-muted);
+        border-radius: 14px;
+        padding: 13px;
+        font-size: 13.5px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+      .venue-link ion-icon {
+        font-size: 17px;
+        color: var(--vip-gold);
+      }
       .hint {
         display: block;
         text-align: center;
@@ -150,5 +175,9 @@ export class LoginPage {
   signIn(): void {
     this.vip.login(this.email, this.password);
     this.router.navigateByUrl('/tabs/home');
+  }
+
+  venuePortal(): void {
+    this.router.navigateByUrl('/venue-portal');
   }
 }

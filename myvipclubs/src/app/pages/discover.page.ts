@@ -68,6 +68,11 @@ import { Venue } from '../models';
                     <ion-icon name="checkmark-circle-outline"></ion-icon> Access granted
                   </button>
                 }
+                @case ('declined') {
+                  <button class="req declined" disabled>
+                    <ion-icon name="close-outline"></ion-icon> Not available right now
+                  </button>
+                }
                 @default {
                   <button class="req" (click)="request(v)">
                     <ion-icon name="flash-outline"></ion-icon> I'm interested — get me in
@@ -116,6 +121,7 @@ import { Venue } from '../models';
       .req.pending { background: var(--vip-surface-2); color: var(--vip-gold-soft); border: 1px solid var(--vip-border); }
       .req.review { background: var(--vip-surface-2); color: #e8cd7a; border: 1px solid color-mix(in srgb, var(--vip-gold) 40%, transparent); }
       .req.approved { background: rgba(111, 209, 143, 0.14); color: #6fd18f; border: 1px solid rgba(111, 209, 143, 0.4); }
+      .req.declined { background: var(--vip-surface-2); color: var(--vip-muted); border: 1px solid var(--vip-border); }
     `,
   ],
 })
