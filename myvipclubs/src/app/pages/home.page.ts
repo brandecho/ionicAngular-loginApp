@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -10,8 +10,11 @@ import {
   IonButton,
   IonIcon,
   IonAvatar,
+  IonBadge,
 } from '@ionic/angular/standalone';
 import { VipService } from '../vip.service';
+import { AccountService } from '../accounts/account.service';
+import { NotificationService } from '../notify/notification.service';
 import { TierBadgeComponent } from '../components/tier-badge.component';
 
 @Component({
@@ -29,6 +32,7 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
     IonButton,
     IonIcon,
     IonAvatar,
+    IonBadge,
     TierBadgeComponent,
   ],
   template: `
@@ -36,6 +40,10 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
       <ion-toolbar>
         <ion-title>My VIP Clubs</ion-title>
         <ion-buttons slot="end">
+          <ion-button routerLink="/inbox">
+            <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+            @if (unread()) { <ion-badge color="danger" class="bell-badge">{{ unread() }}</ion-badge> }
+          </ion-button>
           <ion-button routerLink="/tabs/profile">
             <ion-avatar class="nav-avatar">{{ vip.member().photo }}</ion-avatar>
           </ion-button>
@@ -210,12 +218,20 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
       .vname { color: #fff; font-weight: 700; font-size: 14px; }
       .vmeta { color: var(--vip-muted); font-size: 12px; }
       .foot { height: 24px; }
+      .bell-badge { position: absolute; top: 2px; right: 2px; font-size: 10px; }
     `,
   ],
 })
 export class HomePage {
   vip = inject(VipService);
+  private accounts = inject(AccountService);
+  private notify = inject(NotificationService);
   private router = inject(Router);
+
+  unread = computed(() => {
+    const id = this.accounts.currentAccount()?.id ?? 'acct_member_alex';
+    return this.notify.unreadForAccount(id);
+  });
 
   goCheckIn(): void {
     this.router.navigateByUrl('/checkin');

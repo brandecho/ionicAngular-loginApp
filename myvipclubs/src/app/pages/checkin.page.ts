@@ -10,6 +10,8 @@ import {
   IonIcon,
 } from '@ionic/angular/standalone';
 import { VipService } from '../vip.service';
+import { AccountService } from '../accounts/account.service';
+import { NotificationService } from '../notify/notification.service';
 
 type Step = 'select' | 'locating' | 'notifying' | 'notified';
 
@@ -154,6 +156,8 @@ type Step = 'select' | 'locating' | 'notifying' | 'notified';
 })
 export class CheckinPage implements OnDestroy {
   vip = inject(VipService);
+  private accounts = inject(AccountService);
+  private notify = inject(NotificationService);
   private router = inject(Router);
 
   step = signal<Step>('select');
@@ -182,10 +186,28 @@ export class CheckinPage implements OnDestroy {
     this.timers.push(setTimeout(() => this.step.set('notifying'), 1400));
     this.timers.push(
       setTimeout(() => {
-        this.vip.checkIn(venueId);
+        const alert = this.vip.checkIn(venueId);
+        this.notifyVenueArrival(venueId, alert?.etaMinutes ?? 2);
         this.step.set('notified');
       }, 2800),
     );
+  }
+
+  private notifyVenueArrival(venueId: string, eta: number): void {
+    const venue = this.vip.venueById(venueId);
+    const member = this.vip.member();
+    const tier = this.vip.currentTier().name;
+    this.notify.notify({
+      audience: { kind: 'venue', venueId },
+      type: 'vip_arriving',
+      title: 'VIP arriving now',
+      body: `${member.firstName} ${member.lastName} (${tier}) is ~${eta} min away.`,
+      deepLink: `/manager/${member.id}?venue=${venueId}`,
+      sms: {
+        to: this.accounts.venueAdminsFor(venueId).map((a) => a.phone),
+        body: `My VIP Clubs: ${member.firstName} ${member.lastName} (${tier}) is arriving at ${venue?.name ?? 'your venue'} in ~${eta} min. Open to view their profile.`,
+      },
+    });
   }
 
   openManager(): void {

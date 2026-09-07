@@ -12,12 +12,16 @@ import {
   IonSegment,
   IonSegmentButton,
   IonLabel,
+  IonBadge,
+  IonButton,
   ToastController,
 } from '@ionic/angular/standalone';
 import { VipService } from '../vip.service';
+import { AccountService } from '../accounts/account.service';
+import { NotificationService } from '../notify/notification.service';
 import { TierBadgeComponent } from '../components/tier-badge.component';
 
-type Tab = 'tonight' | 'requests' | 'members' | 'staff';
+type Tab = 'tonight' | 'requests' | 'members' | 'team';
 
 @Component({
   selector: 'app-venue-dashboard',
@@ -34,6 +38,8 @@ type Tab = 'tonight' | 'requests' | 'members' | 'staff';
     IonSegment,
     IonSegmentButton,
     IonLabel,
+    IonBadge,
+    IonButton,
     TierBadgeComponent,
   ],
   template: `
@@ -43,6 +49,12 @@ type Tab = 'tonight' | 'requests' | 'members' | 'staff';
           <ion-back-button defaultHref="/venue-portal"></ion-back-button>
         </ion-buttons>
         <ion-title>{{ venue()?.name }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="openInbox()">
+            <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+            @if (unread()) { <ion-badge color="danger" class="bell-badge">{{ unread() }}</ion-badge> }
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
       <ion-toolbar>
         <ion-segment [value]="tab()" (ionChange)="tab.set($any($event.detail.value))" scrollable>
@@ -55,8 +67,8 @@ type Tab = 'tonight' | 'requests' | 'members' | 'staff';
           <ion-segment-button value="members">
             <ion-label>Members</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="staff">
-            <ion-label>Staff</ion-label>
+          <ion-segment-button value="team">
+            <ion-label>Team{{ pendingStaff().length ? ' (' + pendingStaff().length + ')' : '' }}</ion-label>
           </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
@@ -135,9 +147,28 @@ type Tab = 'tonight' | 'requests' | 'members' | 'staff';
             }
           }
 
-          <!-- ============ STAFF ============ -->
-          @case ('staff') {
-            <p class="lead">Team taking care of guests here.</p>
+          <!-- ============ TEAM ============ -->
+          @case ('team') {
+            @if (pendingStaff().length) {
+              <div class="sub-label">Pending approvals</div>
+              @for (m of pendingStaff(); track m.id) {
+                <div class="req">
+                  <div class="req-top">
+                    <span class="avatar staff">{{ initials(m.name) }}</span>
+                    <div class="body">
+                      <span class="name">{{ m.name }}</span>
+                      <span class="role">{{ m.role }} · wants to join</span>
+                    </div>
+                  </div>
+                  <div class="actions">
+                    <button class="btn decline" (click)="declineStaff(m.id)"><ion-icon name="close-outline"></ion-icon> Decline</button>
+                    <button class="btn approve" (click)="approveStaff(m.id, m.name)"><ion-icon name="checkmark-outline"></ion-icon> Confirm staff</button>
+                  </div>
+                </div>
+              }
+            }
+
+            <div class="sub-label">Current team</div>
             @if (staff().length) {
               @for (s of staff(); track s.id) {
                 <div class="row static">
@@ -146,10 +177,11 @@ type Tab = 'tonight' | 'requests' | 'members' | 'staff';
                     <span class="name">{{ s.name }}</span>
                     <span class="role">{{ s.role }}</span>
                   </div>
+                  <ion-icon class="go" name="checkmark-circle-outline" style="color:#6fd18f"></ion-icon>
                 </div>
               }
             } @else {
-              <div class="empty"><ion-icon name="people-outline"></ion-icon><p>No staff added for this venue yet.</p></div>
+              <div class="empty"><ion-icon name="people-outline"></ion-icon><p>No confirmed team yet.</p></div>
             }
           }
         }
@@ -160,6 +192,8 @@ type Tab = 'tonight' | 'requests' | 'members' | 'staff';
     `
       .page { padding: 12px 18px 28px; max-width: 620px; margin: 0 auto; }
       .lead { color: var(--vip-muted); font-size: 13.5px; margin: 4px 2px 16px; }
+      .sub-label { color: var(--vip-muted); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; margin: 8px 2px 12px; }
+      .bell-badge { position: absolute; top: 2px; right: 0; font-size: 10px; }
 
       .row, .req { background: var(--vip-surface); border: 1px solid var(--vip-border); border-radius: 16px; }
       .row {
@@ -202,6 +236,8 @@ type Tab = 'tonight' | 'requests' | 'members' | 'staff';
 })
 export class VenueDashboardPage {
   vip = inject(VipService);
+  private accounts = inject(AccountService);
+  private notify = inject(NotificationService);
   private router = inject(Router);
   private toast = inject(ToastController);
 
@@ -217,13 +253,25 @@ export class VenueDashboardPage {
   pending = computed(() => this.vip.pendingRequestsForVenue(this.venueId()));
   roster = computed(() => this.vip.membersForVenue(this.venueId()));
   staff = computed(() => this.vip.staffForVenue(this.venueId()));
+  pendingStaff = computed(() => this.accounts.pendingStaffForVenue(this.venueId()));
+  unread = computed(() => this.notify.unreadForVenue(this.venueId()));
+
+  initials(name: string): string {
+    return name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  openInbox(): void {
+    this.router.navigate(['/inbox'], { queryParams: { venue: this.venueId() } });
+  }
 
   openMember(memberId: string): void {
     this.router.navigate(['/manager', memberId], { queryParams: { venue: this.venueId() } });
   }
 
+  // ----- member access requests -----
   async approve(memberId: string, firstName: string): Promise<void> {
     this.vip.approveRequest(memberId, this.venueId());
+    this.notifyMemberDecision(memberId, true);
     const t = await this.toast.create({
       message: `${firstName} is now on the ${this.venue()?.name} VIP list.`,
       duration: 2200,
@@ -235,11 +283,53 @@ export class VenueDashboardPage {
 
   async decline(memberId: string): Promise<void> {
     this.vip.declineRequest(memberId, this.venueId());
+    this.notifyMemberDecision(memberId, false);
     const t = await this.toast.create({
       message: 'Request declined.',
       duration: 1600,
       position: 'top',
     });
+    await t.present();
+  }
+
+  private notifyMemberDecision(memberId: string, approved: boolean): void {
+    const member = this.vip.memberById(memberId);
+    const venueName = this.venue()?.name ?? 'the venue';
+    const acct = this.accounts.accounts().find((a) => a.memberId === memberId);
+    this.notify.notify({
+      audience: { kind: 'account', accountId: acct?.id ?? 'member_' + memberId },
+      type: approved ? 'access_approved' : 'access_declined',
+      title: approved ? `You’re on the list at ${venueName}` : `Not available right now`,
+      body: approved
+        ? `${venueName} approved your access. Skip the line — you're recognized at the door.`
+        : `${venueName} couldn't approve access right now.`,
+      deepLink: approved ? '/tabs/venues' : '/tabs/discover',
+      sms: acct
+        ? {
+            to: [acct.phone],
+            body: approved
+              ? `My VIP Clubs: You're on the VIP list at ${venueName}. See you soon.`
+              : `My VIP Clubs: ${venueName} couldn't approve your access right now.`,
+          }
+        : undefined,
+    });
+  }
+
+  // ----- staff approvals (owner + managers) -----
+  async approveStaff(membershipId: string, name: string): Promise<void> {
+    this.accounts.decideStaff(membershipId, 'approved', this.accounts.currentAccount()?.id);
+    const t = await this.toast.create({
+      message: `${name} confirmed on your team.`,
+      duration: 2000,
+      position: 'top',
+      color: 'primary',
+    });
+    await t.present();
+  }
+
+  async declineStaff(membershipId: string): Promise<void> {
+    this.accounts.decideStaff(membershipId, 'declined', this.accounts.currentAccount()?.id);
+    const t = await this.toast.create({ message: 'Staff request declined.', duration: 1600, position: 'top' });
     await t.present();
   }
 }

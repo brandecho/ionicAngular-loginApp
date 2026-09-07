@@ -8,6 +8,8 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { VipService } from '../vip.service';
+import { AccountService } from '../accounts/account.service';
+import { NotificationService } from '../notify/notification.service';
 import { TierBadgeComponent } from '../components/tier-badge.component';
 import { Venue } from '../models';
 
@@ -127,6 +129,8 @@ import { Venue } from '../models';
 })
 export class DiscoverPage {
   vip = inject(VipService);
+  private accounts = inject(AccountService);
+  private notify = inject(NotificationService);
   private toast = inject(ToastController);
 
   tier(id: string) {
@@ -135,6 +139,22 @@ export class DiscoverPage {
 
   async request(v: Venue): Promise<void> {
     this.vip.requestVenue(v.id);
+
+    // Notify the venue (owner + managers) — inbox + SMS.
+    const member = this.vip.member();
+    const tier = this.vip.currentTier().name;
+    this.notify.notify({
+      audience: { kind: 'venue', venueId: v.id },
+      type: 'access_request',
+      title: 'New access request',
+      body: `${member.firstName} ${member.lastName} (${tier}) wants access to ${v.name}.`,
+      deepLink: `/venue-portal/${v.id}`,
+      sms: {
+        to: this.accounts.venueAdminsFor(v.id).map((a) => a.phone),
+        body: `My VIP Clubs: ${member.firstName} ${member.lastName} (${tier}) requested access to ${v.name}. Review in the venue portal.`,
+      },
+    });
+
     const t = await this.toast.create({
       message: `Request sent to My VIP Clubs for ${v.name}. We'll get you in.`,
       duration: 2600,

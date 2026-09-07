@@ -36,23 +36,49 @@ Built with **Ionic 8 + Angular 20** (standalone components, Angular signals).
 4. The manager taps **"Welcome [name]"** — the host, bar and floor are notified.
    The member walks in, greeted by name, no line, no wait.
 
-## Run it locally
+## View it in a browser
+
+**Hosted (no setup):** every push to this branch auto-builds and deploys to
+GitHub Pages via `.github/workflows/pages.yml`:
+
+> **https://brandecho.github.io/ionicAngular-loginApp/**
+
+One-time enable: repo **Settings → Pages → Build and deployment → Source:
+GitHub Actions**. After the first workflow run finishes, the URL above is live
+and updates on every push.
+
+**Locally:**
 
 ```bash
 cd myvipclubs
 npm install
-npm start          # ng serve on http://localhost:8100  (see angular.json / package.json)
-# or:
-npx ng serve --port 8100
+npm start                 # http://localhost:4200
+# or a fixed port:
+npx ng serve --port 8100  # http://localhost:8100
 ```
 
-Then open http://localhost:8100. On the login screen tap **"Enter the club"** to
-sign in as the demo member (Alex Morgan).
+## Demo accounts (for testing)
 
-### Try the recognition flow
-- From **Home**, tap **I'm here** → pick a venue → watch the GPS/push sequence →
-  tap **Open the manager's view** to see what the venue receives.
-- Or open the venue-side link directly: **`/manager/m1?venue=v2`**.
+On the login screen, tap a **demo account** to sign straight in as that persona,
+or type the email + password. Passwords are `demo` (admin is `admin`).
+
+| Persona | Email | Password | Lands on |
+| --- | --- | --- | --- |
+| Member (Alex Morgan, Platinum) | brandechomedia@gmail.com | demo | Member app |
+| Venue owner (Velvet Room) | elena@velvetroom.com | demo | Venue dashboard |
+| Venue manager (Velvet Room) | sofia@velvetroom.com | demo | Venue dashboard |
+| Platform admin | admin@myvipclubs.app | admin | Admin (venue vetting + SMS outbox) |
+| Staff — pending (Nina) | nina@example.com | demo | Staff status |
+| Owner — pending venue (Lumen) | priya@lumenrooftop.com | demo | Venue portal |
+
+### Things to try
+- **Recognition:** Member → Home → **I'm here** → pick a venue → **Open the
+  manager's view** (or open `/#/manager/m1?venue=v2`).
+- **Staff approval:** Venue owner → **Team** tab → confirm *Nina Torres*.
+- **Venue vetting + SMS log:** Platform admin → approve *Lumen Rooftop*, then
+  open **SMS outbox** to see every text Twilio would send.
+- **Access request:** Member → **Discover** → *get me in* → then sign in as the
+  venue owner to approve it.
 
 ## Project structure
 

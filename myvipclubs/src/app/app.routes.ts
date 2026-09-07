@@ -8,6 +8,22 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/login.page').then((m) => m.LoginPage),
   },
   {
+    path: 'register',
+    loadComponent: () => import('./pages/register.page').then((m) => m.RegisterPage),
+  },
+  {
+    path: 'inbox',
+    loadComponent: () => import('./pages/inbox.page').then((m) => m.InboxPage),
+  },
+  {
+    path: 'admin',
+    loadComponent: () => import('./pages/admin.page').then((m) => m.AdminPage),
+  },
+  {
+    path: 'staff-status/:id',
+    loadComponent: () => import('./pages/staff-status.page').then((m) => m.StaffStatusPage),
+  },
+  {
     path: 'tabs',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/tabs.page').then((m) => m.TabsPage),

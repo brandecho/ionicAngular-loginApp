@@ -91,6 +91,15 @@ export class VipService {
     return this._venues().find((v) => v.id === id);
   }
 
+  /** Add a newly-approved venue to the live catalogue. */
+  addVenue(venue: Venue): void {
+    this._venues.update((vs) => (vs.some((v) => v.id === venue.id) ? vs : [...vs, venue]));
+  }
+
+  nextVenueId(): string {
+    return 'v' + (this._venues().length + 1);
+  }
+
   readonly favoriteVenues = computed<Venue[]>(() => {
     const favs = this.member().favoriteVenueIds;
     return this._venues().filter((v) => favs.includes(v.id));
@@ -122,6 +131,10 @@ export class VipService {
 
   staffForVenue(venueId: string): StaffMember[] {
     return this._staff().filter((s) => s.venueId === venueId);
+  }
+
+  addStaff(staff: StaffMember): void {
+    this._staff.update((list) => (list.some((s) => s.id === staff.id) ? list : [...list, staff]));
   }
 
   // ===================================================================
