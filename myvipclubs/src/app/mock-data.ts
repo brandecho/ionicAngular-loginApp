@@ -55,6 +55,9 @@ export const VENUES: Venue[] = [
     memberTierRequired: 'silver',
     isMember: true,
     distanceMiles: 0.3,
+    lat: 25.7617,
+    lng: -80.1918,
+    geofenceRadius: 250,
   },
   {
     id: 'v2',
@@ -67,6 +70,9 @@ export const VENUES: Venue[] = [
     memberTierRequired: 'gold',
     isMember: true,
     distanceMiles: 1.1,
+    lat: 25.7907,
+    lng: -80.1300,
+    geofenceRadius: 250,
   },
   {
     id: 'v3',
@@ -79,6 +85,9 @@ export const VENUES: Venue[] = [
     memberTierRequired: 'gold',
     isMember: true,
     distanceMiles: 2.4,
+    lat: 25.8010,
+    lng: -80.1990,
+    geofenceRadius: 250,
   },
   {
     id: 'v4',
@@ -91,6 +100,9 @@ export const VENUES: Venue[] = [
     memberTierRequired: 'silver',
     isMember: false,
     distanceMiles: 0.8,
+    lat: 25.7650,
+    lng: -80.1930,
+    geofenceRadius: 250,
   },
   {
     id: 'v5',
@@ -103,6 +115,9 @@ export const VENUES: Venue[] = [
     memberTierRequired: 'platinum',
     isMember: false,
     distanceMiles: 3.2,
+    lat: 25.8130,
+    lng: -80.1920,
+    geofenceRadius: 250,
   },
   {
     id: 'v6',
@@ -115,6 +130,9 @@ export const VENUES: Venue[] = [
     memberTierRequired: 'silver',
     isMember: false,
     distanceMiles: 5.6,
+    lat: 25.8880,
+    lng: -80.1260,
+    geofenceRadius: 250,
   },
   {
     id: 'v7',
@@ -127,6 +145,9 @@ export const VENUES: Venue[] = [
     memberTierRequired: 'gold',
     isMember: false,
     distanceMiles: 4.0,
+    lat: 25.7650,
+    lng: -80.2200,
+    geofenceRadius: 250,
   },
   {
     id: 'v8',
@@ -139,6 +160,9 @@ export const VENUES: Venue[] = [
     memberTierRequired: 'platinum',
     isMember: false,
     distanceMiles: 1.9,
+    lat: 25.7920,
+    lng: -80.1350,
+    geofenceRadius: 250,
   },
 ];
 

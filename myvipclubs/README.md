@@ -76,8 +76,26 @@ myvipclubs/
     mock-data.ts             Demo member, venues, staff, tiers
 ```
 
+## Native app (Cordova + Pushwoosh + geofencing)
+
+The app is packaged for iOS/Android with **Apache Cordova**:
+
+- **Push** via the **Pushwoosh** Cordova plugin (`pushwoosh-cordova-plugin`) —
+  registration, device tagging by member id, and deep-linking a tapped push
+  (e.g. a manager opening the "VIP arriving" alert → the recognition view).
+- **Geofencing** via `cordova-plugin-geofence` — a geofence is armed around every
+  venue the member can enter; on **arrival** it fires the same `checkIn()` that
+  the "I'm here" button does, which is what alerts the venue manager.
+
+The native integration lives in `src/app/native/` and is fully guarded by
+`isCordova()`, so `ng serve` / the web build are unaffected. Web build outputs to
+`./www`, which Cordova packages.
+
+See **[CORDOVA.md](./CORDOVA.md)** for the full build guide (credentials,
+`cordova platform add`, run/build scripts, permissions, and the backend piece).
+
 ## Notes
-This is a functional front-end prototype. Data is in-memory mock data
-(`mock-data.ts`) and the GPS/push steps are simulated in the browser. Wiring up a
-real backend, geolocation, and push notifications (e.g. Capacitor Geolocation +
-Push Notifications / FCM) are the natural next steps.
+This is a functional client prototype. Data is in-memory mock data
+(`mock-data.ts`); on the web the GPS/push steps are simulated. In a Cordova build
+the geofence + Pushwoosh plugins are real — the remaining production piece is a
+backend that delivers the manager push (see CORDOVA.md §7).

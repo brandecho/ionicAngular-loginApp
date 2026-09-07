@@ -2,9 +2,16 @@
 
 # Compiled output
 /dist
+/www
 /tmp
 /out-tsc
 /bazel-out
+
+# Cordova (generated)
+/platforms
+/plugins
+/google-services.json
+GoogleService-Info.plist
 
 # Node
 /node_modules

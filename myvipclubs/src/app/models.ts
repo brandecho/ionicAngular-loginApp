@@ -34,6 +34,11 @@ export interface Venue {
   isMember: boolean;
   /** Rough distance in miles for the check-in / nearby demo. */
   distanceMiles?: number;
+  /** Geo-coordinates used to arm a native geofence around the venue. */
+  lat: number;
+  lng: number;
+  /** Geofence trigger radius in meters (defaults applied if omitted). */
+  geofenceRadius?: number;
 }
 
 export type RequestStatus = 'requested' | 'in_review' | 'approved';

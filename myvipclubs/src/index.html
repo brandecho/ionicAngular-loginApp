@@ -3,7 +3,16 @@
 <head>
   <meta charset="utf-8">
   <title>My VIP Clubs</title>
-  <base href="/">
+  <base href="./">
+  <!-- Content Security Policy for the Cordova webview (also allows Pushwoosh). -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' data: gap: content: https://ssl.gstatic.com;
+                 style-src 'self' 'unsafe-inline';
+                 img-src 'self' data: content: blob:;
+                 media-src *;
+                 connect-src 'self' https://*.pushwoosh.com https://*.pushwoosh.co https://*.pushwoosh.io;">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
   <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0a0a0f">
   <meta name="description" content="My VIP Clubs — the hookup. Recognized before you walk in the door.">
@@ -11,5 +20,7 @@
 </head>
 <body>
   <app-root></app-root>
+  <!-- Provided by Cordova at runtime; 404s during `ng serve` in a browser (harmless). -->
+  <script src="cordova.js"></script>
 </body>
 </html>

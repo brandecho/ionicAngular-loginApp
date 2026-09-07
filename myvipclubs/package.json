@@ -6,7 +6,12 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "cordova:prepare": "npm run build && cordova prepare",
+    "cordova:run:android": "npm run build && cordova run android",
+    "cordova:build:android": "npm run build && cordova build android",
+    "cordova:run:ios": "npm run build && cordova run ios",
+    "cordova:build:ios": "npm run build && cordova build ios"
   },
   "prettier": {
     "printWidth": 100,
@@ -21,6 +26,21 @@
     ]
   },
   "private": true,
+  "cordova": {
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "plugins": {
+      "cordova-plugin-device": {},
+      "cordova-plugin-geolocation": {
+        "GEOLOCATION_USAGE_DESCRIPTION": "My VIP Clubs uses your location to recognize you when you arrive at a venue."
+      },
+      "pushwoosh-cordova-plugin": {},
+      "cordova-plugin-geofence": {},
+      "cordova-plugin-androidx-adapter": {}
+    }
+  },
   "dependencies": {
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.3.0",
@@ -45,6 +65,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "cordova": "^12.0.0"
   }
 }
