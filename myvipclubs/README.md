@@ -38,14 +38,9 @@ Built with **Ionic 8 + Angular 20** (standalone components, Angular signals).
 
 ## View it in a browser
 
-**Hosted (no setup):** every push to this branch auto-builds and deploys to
-GitHub Pages via `.github/workflows/pages.yml`:
-
-> **https://brandecho.github.io/ionicAngular-loginApp/**
-
-One-time enable: repo **Settings → Pages → Build and deployment → Source:
-GitHub Actions**. After the first workflow run finishes, the URL above is live
-and updates on every push.
+**Hosted — Netlify (recommended):** connect the repo once and Netlify gives you
+a live, auto-updating URL. Build settings are pre-filled by `netlify.toml`.
+Step-by-step (first-timer friendly): **[NETLIFY.md](../NETLIFY.md)**.
 
 **Locally:**
 

@@ -1,0 +1,18 @@
+# Netlify build settings for My VIP Clubs.
+# Netlify reads this automatically when you connect the repo — no manual
+# build-config typing needed.
+
+[build]
+  base = "myvipclubs"          # the Angular app lives here
+  command = "npm run build"    # produces ./www
+  publish = "www"              # what Netlify serves (relative to base)
+
+[build.environment]
+  NODE_VERSION = "22"          # Angular 20 needs Node 20.19+/22.12+
+
+# Single-page-app fallback: serve index.html for any path so refreshes and
+# deep links resolve (the app itself uses hash routing).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
