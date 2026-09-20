@@ -1,8 +1,22 @@
 /**
  * Translate between the API's snake_case rows and the app's camelCase models.
  */
-import { Member, MemberPreferences, TierId, Venue } from '../models';
+import { Member, MemberPreferences, PostalAddress, TierId, Venue } from '../models';
 import { ApiMemberRow, ApiVenueRow } from './api.models';
+
+/** The member fields the "Basic information" editor manages. */
+export interface BasicInfoDraft {
+  firstName: string;
+  lastName: string;
+  preferredName: string;
+  email: string;
+  phone: string;
+  street1: string;
+  street2: string;
+  city: string;
+  state: string;
+  postal: string;
+}
 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
 const num = (v: unknown): number => {
@@ -21,6 +35,16 @@ const VENUE_TYPES: Venue['type'][] = [
   'Members Club',
 ];
 const TIERS: TierId[] = ['silver', 'gold', 'platinum', 'black', 'noir'];
+
+function toAddress(r: ApiMemberRow): PostalAddress | undefined {
+  const street1 = str(r.address_street1);
+  const street2 = str(r.address_street2);
+  const city = str(r.address_city);
+  const state = str(r.address_state);
+  const postal = str(r.address_postal);
+  if (!street1 && !street2 && !city && !state && !postal) return undefined;
+  return { street1, street2: street2 || undefined, city, state, postal };
+}
 
 /** members-table row -> app Member. */
 export function toMember(r: ApiMemberRow): Member {
@@ -52,6 +76,12 @@ export function toMember(r: ApiMemberRow): Member {
     linkedInUrl: blankToUndef(str(r.linkedin_url)),
     socialProfile: blankToUndef(str(r.social_profile)),
     membershipPhotoUrl: blankToUndef(str(r.membership_photo_url)),
+    homeAddress: toAddress(r),
+    employer: blankToUndef(str(r.employer)),
+    industry: blankToUndef(str(r.industry)),
+    jobTitle: blankToUndef(str(r.job_title)),
+    relationshipStatus: blankToUndef(str(r.relationship_status)),
+    howHeard: blankToUndef(str(r.how_heard)),
     preferences,
     memberSince: num(r.member_since) || new Date().getFullYear(),
     photo: '🕶️',
@@ -85,6 +115,22 @@ export function prefsToPatch(p: MemberPreferences): Record<string, unknown> {
     do_not_share: p.doNotShare,
     additional_notes: p.additionalNotes,
     consent_share_with_venues: p.consentShareWithVenues ? 1 : 0,
+  };
+}
+
+/** Basic-info editor -> PATCH /members/me body. */
+export function basicToPatch(b: BasicInfoDraft): Record<string, unknown> {
+  return {
+    first_name: b.firstName.trim(),
+    last_name: b.lastName.trim(),
+    preferred_name: b.preferredName.trim(),
+    email: b.email.trim(),
+    phone: b.phone.trim(),
+    address_street1: b.street1.trim(),
+    address_street2: b.street2.trim(),
+    address_city: b.city.trim(),
+    address_state: b.state.trim(),
+    address_postal: b.postal.trim(),
   };
 }
 

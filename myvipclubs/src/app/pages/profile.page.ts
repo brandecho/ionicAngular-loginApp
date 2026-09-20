@@ -20,7 +20,7 @@ import { VipService } from '../vip.service';
 import { TierBadgeComponent } from '../components/tier-badge.component';
 import { MemberPreferences } from '../models';
 import { ApiService } from '../api/api.service';
-import { prefsToPatch, toMember } from '../api/api.mappers';
+import { BasicInfoDraft, basicToPatch, prefsToPatch, toMember } from '../api/api.mappers';
 
 @Component({
   selector: 'app-profile',
@@ -74,6 +74,57 @@ import { prefsToPatch, toMember } from '../api/api.mappers';
             <span class="ltv">{{ vip.lifetimeValue() | currency: 'USD' : 'symbol' : '1.0-0' }} lifetime</span>
           </div>
         </div>
+
+        <div class="section-label">
+          Basic information
+          <button class="edit" (click)="toggleBasic()" [disabled]="savingBasic()">
+            <ion-icon [name]="editingBasic() ? 'checkmark-outline' : 'create-outline'"></ion-icon>
+            {{ editingBasic() ? (savingBasic() ? 'Saving…' : 'Save') : 'Edit' }}
+          </button>
+        </div>
+
+        <ion-list class="prefs" lines="full">
+          <ion-item>
+            <ion-icon slot="start" name="person-circle-outline"></ion-icon>
+            <ion-input label="First name" labelPlacement="stacked" [readonly]="!editingBasic()" [(ngModel)]="basic.firstName"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="person-circle-outline"></ion-icon>
+            <ion-input label="Last name" labelPlacement="stacked" [readonly]="!editingBasic()" [(ngModel)]="basic.lastName"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="sparkles-outline"></ion-icon>
+            <ion-input label="Preferred name / nickname" labelPlacement="stacked" [readonly]="!editingBasic()" [(ngModel)]="basic.preferredName"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="mail-outline"></ion-icon>
+            <ion-input label="Email" type="email" labelPlacement="stacked" [readonly]="!editingBasic()" [(ngModel)]="basic.email"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="call-outline"></ion-icon>
+            <ion-input label="Mobile (for text alerts)" type="tel" labelPlacement="stacked" [readonly]="!editingBasic()" [(ngModel)]="basic.phone"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="home"></ion-icon>
+            <ion-input label="Home address" labelPlacement="stacked" placeholder="Street address" [readonly]="!editingBasic()" [(ngModel)]="basic.street1"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="home"></ion-icon>
+            <ion-input label="Apt / suite (optional)" labelPlacement="stacked" [readonly]="!editingBasic()" [(ngModel)]="basic.street2"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="location-outline"></ion-icon>
+            <ion-input label="City" labelPlacement="stacked" [readonly]="!editingBasic()" [(ngModel)]="basic.city"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="location-outline"></ion-icon>
+            <ion-input label="State" labelPlacement="stacked" [readonly]="!editingBasic()" [(ngModel)]="basic.state"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="location-outline"></ion-icon>
+            <ion-input label="ZIP / postal code" labelPlacement="stacked" [readonly]="!editingBasic()" [(ngModel)]="basic.postal"></ion-input>
+          </ion-item>
+        </ion-list>
 
         <div class="section-label">
           My tastes
@@ -202,6 +253,64 @@ export class ProfilePage {
   saving = signal(false);
   uploading = signal(false);
   draft: MemberPreferences = { ...this.vip.member().preferences };
+
+  editingBasic = signal(false);
+  savingBasic = signal(false);
+  basic: BasicInfoDraft = this.snapshotBasic();
+
+  private snapshotBasic(): BasicInfoDraft {
+    const m = this.vip.member();
+    const a = m.homeAddress;
+    return {
+      firstName: m.firstName ?? '',
+      lastName: m.lastName ?? '',
+      preferredName: m.preferredName ?? '',
+      email: m.email ?? '',
+      phone: m.phone ?? '',
+      street1: a?.street1 ?? '',
+      street2: a?.street2 ?? '',
+      city: a?.city ?? '',
+      state: a?.state ?? '',
+      postal: a?.postal ?? '',
+    };
+  }
+
+  async toggleBasic(): Promise<void> {
+    if (!this.editingBasic()) {
+      this.basic = this.snapshotBasic();
+      this.editingBasic.set(true);
+      return;
+    }
+    if (this.savingBasic()) return;
+    if (!this.api.isLoggedIn()) {
+      await this.showToast('Sign in to edit your details.', 'warning');
+      this.editingBasic.set(false);
+      return;
+    }
+    if (!this.basic.firstName.trim() || !this.basic.email.trim()) {
+      await this.showToast('Name and email are required.', 'warning');
+      return;
+    }
+    this.savingBasic.set(true);
+    try {
+      const row = await this.api.updateMe(basicToPatch(this.basic));
+      this.vip.setCurrentMember(toMember(row));
+      this.editingBasic.set(false);
+      await this.showToast('Details saved.', 'primary');
+    } catch (err) {
+      await this.showToast(this.basicError(err), 'danger');
+    } finally {
+      this.savingBasic.set(false);
+    }
+  }
+
+  private basicError(err: unknown): string {
+    const status = (err as { status?: number })?.status;
+    if (status === 409) return 'That email is already in use by another account.';
+    if (status === 400) return 'Please enter a valid name and email.';
+    if (status === 0 || status === undefined) return "Couldn't reach the server — try again.";
+    return 'Could not save your details. Please try again.';
+  }
 
   async onPhotoSelected(ev: Event): Promise<void> {
     const input = ev.target as HTMLInputElement;

@@ -33,6 +33,16 @@ export interface ApiMemberRow {
   member_since?: number | string | null;
   application_status?: string | null;
   tier?: string | null;
+  address_street1?: string | null;
+  address_street2?: string | null;
+  address_city?: string | null;
+  address_state?: string | null;
+  address_postal?: string | null;
+  relationship_status?: string | null;
+  how_heard?: string | null;
+  employer?: string | null;
+  industry?: string | null;
+  job_title?: string | null;
   total_spent?: string | number | null;
   total_tips?: string | number | null;
   visits_this_year?: number | null;

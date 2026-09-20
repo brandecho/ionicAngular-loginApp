@@ -2,9 +2,15 @@
 declare(strict_types=1);
 
 final class Members {
-  // Fields a member may edit on their own profile (Sections 5 & 6 + contact).
+  // Fields a member may edit on their own profile.
   private const EDITABLE = [
-    'preferred_name', 'phone', 'linkedin_url', 'social_profile',
+    // Basic information & contact
+    'first_name', 'last_name', 'preferred_name', 'email', 'phone',
+    'address_street1', 'address_street2', 'address_city', 'address_state', 'address_postal',
+    'linkedin_url', 'social_profile', 'relationship_status', 'how_heard',
+    // Professional
+    'employer', 'industry', 'job_title',
+    // VIP preferences (Sections 5 & 6)
     'favorite_foods', 'favorite_restaurants', 'preferred_beverages', 'dietary_restrictions',
     'favorite_wine_spirits', 'preferred_seating', 'preferred_atmosphere', 'music', 'smoking',
     'special_occasions', 'hospitality_details', 'what_makes_vip', 'do_not_share',
@@ -23,16 +29,34 @@ final class Members {
   /** PATCH /api/members/me */
   public static function update(): void {
     $auth = requireAuth();
-    if (empty($auth['memberId'])) Response::error('no member profile', 404);
+    $mid = $auth['memberId'];
+    if (empty($mid)) Response::error('no member profile', 404);
     $b = body();
+
+    // Email doubles as the login (accounts table), so validate it and keep
+    // both tables in sync when it changes.
+    if (array_key_exists('email', $b)) {
+      $email = trim((string) $b['email']);
+      if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        Response::error('a valid email is required', 400);
+      }
+      $taken = Db::one(
+        'SELECT id FROM accounts WHERE email = :e AND (member_id IS NULL OR member_id <> :mid)',
+        ['e' => $email, 'mid' => $mid]
+      );
+      if ($taken) Response::error('that email is already in use', 409);
+      Db::run('UPDATE accounts SET email = :e WHERE member_id = :mid', ['e' => $email, 'mid' => $mid]);
+      $b['email'] = $email; // normalized value flows into members below
+    }
+
     $set = [];
-    $params = ['id' => $auth['memberId']];
+    $params = ['id' => $mid];
     foreach (self::EDITABLE as $col) {
       if (array_key_exists($col, $b)) { $set[] = "$col = :$col"; $params[$col] = $b[$col]; }
     }
     if (!$set) Response::error('no editable fields', 400);
     Db::run('UPDATE members SET ' . implode(', ', $set) . ' WHERE id = :id', $params);
-    Response::json(Db::one('SELECT * FROM members WHERE id = :id', ['id' => $auth['memberId']]));
+    Response::json(Db::one('SELECT * FROM members WHERE id = :id', ['id' => $mid]));
   }
 
   /**
