@@ -32,8 +32,7 @@ interface DemoPersona {
     <ion-content class="login" [fullscreen]="true">
       <div class="wrap">
         <div class="brand">
-          <div class="crest"><ion-icon name="diamond"></ion-icon></div>
-          <h1>My VIP <span>Clubs</span></h1>
+          <img class="logo" src="logo.png" alt="My VIP Clubs" />
           <p class="sub">The hookup. Recognized before you walk in.</p>
         </div>
 
@@ -83,11 +82,8 @@ interface DemoPersona {
       }
       .wrap { max-width: 460px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 28px 22px; }
       .brand { text-align: center; margin-bottom: 26px; }
-      .crest { width: 68px; height: 68px; margin: 0 auto 16px; border-radius: 20px; display: grid; place-items: center; background: linear-gradient(160deg, #d4af37, #8f7220); box-shadow: 0 12px 40px rgba(212, 175, 55, 0.35); }
-      .crest ion-icon { font-size: 32px; color: #14131b; }
-      h1 { font-size: 28px; font-weight: 800; letter-spacing: 0.02em; margin: 0; color: #fff; }
-      h1 span { color: var(--vip-gold); }
-      .sub { color: var(--vip-muted); margin-top: 8px; font-size: 14px; }
+      .logo { width: 260px; max-width: 80%; height: auto; margin: 0 auto 4px; display: block; filter: drop-shadow(0 10px 30px rgba(212, 175, 55, 0.28)); }
+      .sub { color: var(--vip-muted); margin-top: 10px; font-size: 14px; }
       .form { background: var(--vip-surface); border: 1px solid var(--vip-border); border-radius: 18px; overflow: hidden; padding: 4px 6px; }
       ion-item { --background: transparent; }
       ion-item ion-icon[slot='start'] { color: var(--vip-gold); margin-inline-end: 12px; }
