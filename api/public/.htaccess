@@ -1,0 +1,18 @@
+# Route every request through index.php and preserve the Authorization header.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Make the Authorization header available to PHP (Apache CGI/FastCGI strips it)
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  # Send anything that isn't a real file/dir to the front controller
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Never serve config or source directly (defense in depth; docroot is /public)
+<FilesMatch "\.(sql|md)$">
+  Require all denied
+</FilesMatch>
