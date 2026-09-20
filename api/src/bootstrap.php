@@ -15,6 +15,7 @@ require __DIR__ . '/routes/Auth.php';
 require __DIR__ . '/routes/Members.php';
 require __DIR__ . '/routes/Venues.php';
 require __DIR__ . '/routes/Jotform.php';
+require __DIR__ . '/routes/Admin.php';
 
 function cfg(string $key, $default = null) {
   return $GLOBALS['CONFIG'][$key] ?? $default;
@@ -57,5 +58,12 @@ function requireAuth(): array {
   $token = bearerToken();
   $claims = $token ? Jwt::verify($token) : null;
   if (!$claims) Response::error('unauthorized', 401);
+  return $claims;
+}
+
+/** Require an admin session; returns claims or sends 401/403. */
+function requireAdmin(): array {
+  $claims = requireAuth();
+  if (($claims['role'] ?? '') !== 'admin') Response::error('admin only', 403);
   return $claims;
 }

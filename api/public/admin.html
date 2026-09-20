@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My VIP Clubs — Admin</title>
+<style>
+  :root { --gold:#d4af37; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,system-ui,sans-serif; background:#0e0e14; color:#eee; margin:0; }
+  header { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid #23232e; background:#12121a; }
+  header .brand { color:var(--gold); font-weight:800; }
+  .wrap { max-width:1000px; margin:0 auto; padding:20px; }
+  .card { background:#191922; border:1px solid #2a2a36; border-radius:14px; padding:18px; margin:14px 0; }
+  h2 { font-size:16px; margin:0 0 10px; }
+  label { display:block; font-size:11px; color:#9a9aa8; margin:10px 0 4px; text-transform:uppercase; letter-spacing:.05em; }
+  input, select { width:100%; padding:9px; border-radius:8px; border:1px solid #33333f; background:#0f0f16; color:#fff; font-size:14px; }
+  button { background:linear-gradient(120deg,#d4af37,#a9861f); color:#14131b; border:none; border-radius:10px; padding:10px 15px; font-weight:700; font-size:13.5px; cursor:pointer; }
+  button.sec { background:#22222c; color:#e8cd7a; border:1px solid #3a3a46; }
+  .tabs { display:flex; gap:8px; margin-bottom:14px; }
+  .tabs button { background:#22222c; color:#cfcfe0; border:1px solid #33333f; }
+  .tabs button.active { background:var(--gold); color:#14131b; border-color:var(--gold); }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th, td { text-align:left; padding:9px 8px; border-bottom:1px solid #23232e; }
+  th { color:#9a9aa8; font-size:11px; text-transform:uppercase; }
+  tr.click { cursor:pointer; } tr.click:hover td { background:#20202b; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; }
+  .msg { font-size:13px; margin-top:10px; } .ok{color:#6fd18f;} .err{color:#ff8f8f;}
+  .pill{font-size:11px;padding:2px 8px;border-radius:99px;background:#2a2a36;color:#cfcfe0;}
+  .hidden{display:none;}
+  .rowbtns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .muted{color:#9a9aa8;font-size:12.5px;}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">◆ My VIP Clubs — Admin</span>
+  <span id="who" class="muted"></span>
+</header>
+
+<div class="wrap">
+  <!-- LOGIN -->
+  <div id="loginCard" class="card" style="max-width:420px;margin:40px auto;">
+    <h2>Admin sign in</h2>
+    <label>Email</label><input id="email" value="admin@myvipclubs.app">
+    <label>Password</label><input id="password" type="password" value="admin123">
+    <div class="rowbtns"><button onclick="login()">Sign in</button></div>
+    <div id="loginMsg" class="msg"></div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="admin" class="hidden">
+    <div class="tabs">
+      <button id="tabMembers" class="active" onclick="showTab('members')">Members</button>
+      <button id="tabVenues" onclick="showTab('venues')">Venues</button>
+    </div>
+
+    <!-- MEMBERS -->
+    <div id="membersView">
+      <div class="card">
+        <h2>Members <button class="sec" style="float:right" onclick="loadMembers()">Refresh</button></h2>
+        <table><thead><tr><th>Name</th><th>Email</th><th>Tier</th><th>Status</th><th>Since</th></tr></thead>
+          <tbody id="membersBody"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody></table>
+      </div>
+      <div id="memberEdit" class="card hidden">
+        <h2>Edit member</h2>
+        <div class="grid">
+          <div><label>First name</label><input id="m_first_name"></div>
+          <div><label>Last name</label><input id="m_last_name"></div>
+          <div><label>Email</label><input id="m_email"></div>
+          <div><label>Phone</label><input id="m_phone"></div>
+          <div><label>Tier</label><select id="m_tier"><option value="">—</option><option>silver</option><option>gold</option><option>platinum</option><option>black</option><option>noir</option></select></div>
+          <div><label>Application status</label><select id="m_application_status"><option>pending</option><option>approved</option><option>declined</option></select></div>
+          <div><label>Preferred beverages</label><input id="m_preferred_beverages"></div>
+          <div><label>Preferred seating</label><input id="m_preferred_seating"></div>
+          <div><label>Dietary / allergies</label><input id="m_dietary_restrictions"></div>
+          <div><label>Music</label><input id="m_music"></div>
+          <div><label>Total spent</label><input id="m_total_spent" type="number"></div>
+          <div><label>Total tips</label><input id="m_total_tips" type="number"></div>
+          <div><label>Member since (year)</label><input id="m_member_since" type="number"></div>
+        </div>
+        <div class="rowbtns"><button onclick="saveMember()">Save member</button><button class="sec" onclick="hide('memberEdit')">Close</button></div>
+        <div id="memberMsg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- VENUES -->
+    <div id="venuesView" class="hidden">
+      <div class="card">
+        <h2>Venues
+          <span style="float:right"><button class="sec" onclick="newVenue()">+ Add venue</button>
+          <button class="sec" onclick="loadVenues()">Refresh</button></span></h2>
+        <table><thead><tr><th>Name</th><th>Type</th><th>Neighborhood</th><th>Tier</th><th>Status</th></tr></thead>
+          <tbody id="venuesBody"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody></table>
+      </div>
+      <div id="venueEdit" class="card hidden">
+        <h2 id="venueEditTitle">Edit venue</h2>
+        <div class="grid">
+          <div><label>Name</label><input id="v_name"></div>
+          <div><label>Type</label><input id="v_type" placeholder="Nightclub / Lounge / …"></div>
+          <div style="grid-column:1/3"><label>Address</label><input id="v_address"></div>
+          <div><label>Neighborhood</label><input id="v_neighborhood"></div>
+          <div><label>City</label><input id="v_city"></div>
+          <div><label>Tier required</label><select id="v_tier_required"><option>silver</option><option>gold</option><option>platinum</option><option>black</option><option>noir</option></select></div>
+          <div><label>Status</label><select id="v_status"><option>active</option><option>pending</option><option>declined</option></select></div>
+          <div><label>Latitude</label><input id="v_lat" type="number" step="any"></div>
+          <div><label>Longitude</label><input id="v_lng" type="number" step="any"></div>
+        </div>
+        <div class="rowbtns"><button onclick="saveVenue()">Save venue</button><button class="sec" onclick="hide('venueEdit')">Close</button></div>
+        <div id="venueMsg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let token = null, editingMemberId = null, editingVenueId = null;
+  const $ = (id) => document.getElementById(id);
+  const gv = (id) => $(id).value;
+  const sv = (id, v) => { $(id).value = (v == null ? '' : v); };
+  const hide = (id) => $(id).classList.add('hidden');
+  const shown = (id) => $(id).classList.remove('hidden');
+  function msg(id, text, isErr) { $(id).className = 'msg ' + (isErr ? 'err' : 'ok'); $(id).textContent = text; }
+
+  async function call(method, path, body, auth = true) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (auth && token) headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch('/api' + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    let data; const t = await res.text(); try { data = JSON.parse(t); } catch { data = t; }
+    return { status: res.status, data };
+  }
+
+  async function login() {
+    try {
+      const r = await call('POST', '/auth/login', { email: gv('email'), password: gv('password') }, false);
+      if (r.status >= 400 || !r.data.token) return msg('loginMsg', (r.data.error || 'Login failed'), true);
+      if (r.data.account.role !== 'admin') return msg('loginMsg', 'That account is not an admin.', true);
+      token = r.data.token;
+      $('who').textContent = 'Signed in as ' + r.data.account.name;
+      hide('loginCard'); shown('admin'); loadMembers(); loadVenues();
+    } catch (e) { msg('loginMsg', 'Cannot reach API: ' + e.message, true); }
+  }
+
+  function showTab(t) {
+    $('tabMembers').classList.toggle('active', t === 'members');
+    $('tabVenues').classList.toggle('active', t === 'venues');
+    $('membersView').classList.toggle('hidden', t !== 'members');
+    $('venuesView').classList.toggle('hidden', t !== 'venues');
+  }
+
+  // ---- members ----
+  async function loadMembers() {
+    const r = await call('GET', '/admin/members');
+    const b = $('membersBody'); b.innerHTML = '';
+    if (!Array.isArray(r.data)) { b.innerHTML = '<tr><td colspan="5" class="err">' + (r.data.error || 'error') + '</td></tr>'; return; }
+    if (!r.data.length) { b.innerHTML = '<tr><td colspan="5" class="muted">No members yet.</td></tr>'; return; }
+    for (const m of r.data) {
+      const tr = document.createElement('tr'); tr.className = 'click';
+      tr.innerHTML = `<td>${esc(m.first_name)} ${esc(m.last_name)}</td><td>${esc(m.email)}</td>
+        <td><span class="pill">${esc(m.tier || '—')}</span></td><td>${esc(m.application_status)}</td><td>${esc(m.member_since || '—')}</td>`;
+      tr.onclick = () => editMember(m.id);
+      b.appendChild(tr);
+    }
+  }
+  async function editMember(id) {
+    const r = await call('GET', '/admin/members/' + id);
+    if (r.status >= 400) return;
+    editingMemberId = id; const m = r.data;
+    for (const f of ['first_name','last_name','email','phone','tier','application_status','preferred_beverages','preferred_seating','dietary_restrictions','music','total_spent','total_tips','member_since'])
+      sv('m_' + f, m[f]);
+    shown('memberEdit'); $('memberEdit').scrollIntoView({ behavior:'smooth' });
+    msg('memberMsg', '', false); $('memberMsg').textContent='';
+  }
+  async function saveMember() {
+    const body = {};
+    for (const f of ['first_name','last_name','email','phone','tier','application_status','preferred_beverages','preferred_seating','dietary_restrictions','music','total_spent','total_tips','member_since'])
+      body[f] = gv('m_' + f);
+    const r = await call('PATCH', '/admin/members/' + editingMemberId, body);
+    if (r.status >= 400) return msg('memberMsg', (r.data.error || 'Save failed'), true);
+    msg('memberMsg', 'Saved ✓', false); loadMembers();
+  }
+
+  // ---- venues ----
+  async function loadVenues() {
+    const r = await call('GET', '/admin/venues');
+    const b = $('venuesBody'); b.innerHTML = '';
+    if (!Array.isArray(r.data)) { b.innerHTML = '<tr><td colspan="5" class="err">' + (r.data.error || 'error') + '</td></tr>'; return; }
+    if (!r.data.length) { b.innerHTML = '<tr><td colspan="5" class="muted">No venues yet.</td></tr>'; return; }
+    for (const v of r.data) {
+      const tr = document.createElement('tr'); tr.className = 'click';
+      tr.innerHTML = `<td>${esc(v.name)}</td><td>${esc(v.type || '—')}</td><td>${esc(v.neighborhood || '—')}</td>
+        <td><span class="pill">${esc(v.tier_required)}</span></td><td>${esc(v.status)}</td>`;
+      tr.onclick = () => editVenue(v);
+      b.appendChild(tr);
+    }
+  }
+  function fillVenue(v) {
+    for (const f of ['name','type','address','neighborhood','city','tier_required','status','lat','lng']) sv('v_' + f, v[f]);
+  }
+  function editVenue(v) { editingVenueId = v.id; $('venueEditTitle').textContent = 'Edit venue'; fillVenue(v); shown('venueEdit'); $('venueEdit').scrollIntoView({behavior:'smooth'}); $('venueMsg').textContent=''; }
+  function newVenue() { editingVenueId = null; $('venueEditTitle').textContent = 'Add venue'; fillVenue({ tier_required:'silver', status:'active' }); shown('venueEdit'); $('venueEdit').scrollIntoView({behavior:'smooth'}); $('venueMsg').textContent=''; }
+  async function saveVenue() {
+    const body = {};
+    for (const f of ['name','type','address','neighborhood','city','tier_required','status','lat','lng']) body[f] = gv('v_' + f);
+    const r = editingVenueId
+      ? await call('PATCH', '/admin/venues/' + editingVenueId, body)
+      : await call('POST', '/admin/venues', body);
+    if (r.status >= 400) return msg('venueMsg', (r.data.error || 'Save failed'), true);
+    msg('venueMsg', 'Saved ✓', false); loadVenues();
+    if (!editingVenueId && r.data.id) editingVenueId = r.data.id;
+  }
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+</script>
+</body>
+</html>

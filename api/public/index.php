@@ -43,6 +43,14 @@ try {
   // jotform webhook
   if ($path === '/webhooks/jotform' && $method === 'POST') Jotform::webhook();
 
+  // ---- admin (admin role required) ----
+  if ($path === '/admin/members' && $method === 'GET') Admin::listMembers();
+  if (count($seg) === 3 && $seg[0] === 'admin' && $seg[1] === 'members' && $method === 'GET') Admin::getMember($seg[2]);
+  if (count($seg) === 3 && $seg[0] === 'admin' && $seg[1] === 'members' && $method === 'PATCH') Admin::updateMember($seg[2]);
+  if ($path === '/admin/venues' && $method === 'GET') Admin::listVenues();
+  if ($path === '/admin/venues' && $method === 'POST') Admin::createVenue();
+  if (count($seg) === 3 && $seg[0] === 'admin' && $seg[1] === 'venues' && $method === 'PATCH') Admin::updateVenue($seg[2]);
+
   Response::error('not found', 404);
 } catch (Throwable $e) {
   error_log('[api] ' . $e->getMessage());
