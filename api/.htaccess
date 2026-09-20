@@ -1,13 +1,23 @@
 # -----------------------------------------------------------------------------
 # Security lock for the API folder.
 #
-# The API is meant to be served ONLY through the api.myvipclubs.com subdomain,
-# whose document root is the child "public/" folder. This file blocks the main
-# website (e.g. myvipclubs.com/api/...) from reaching the private files that
-# live here — config.php (database password), src/ (code), and the .sql files.
+# The live API is served through the api.myvipclubs.com subdomain, whose
+# document root is the child "public/" folder. On cPanel/GoDaddy, Apache reads
+# .htaccess files all the way down the path to a file, so a blanket
+# "Require all denied" here would ALSO block the subdomain (it passes through
+# this folder to reach public/). Instead we deny only the sensitive files by
+# name/type. The application code in src/ is locked by its own .htaccess.
 #
-# Apache does not read this file for the subdomain (its document root is the
-# public/ subfolder below), so it does NOT block the real API — only direct
-# access to this folder from other domains.
+# This blocks the main website (e.g. myvipclubs.com/api/config.php) from
+# reaching private files, while letting the subdomain's public/ work.
 # -----------------------------------------------------------------------------
-Require all denied
+
+# Config files (hold the DB password + JWT secret) — never serve these.
+<FilesMatch "^config(\.example)?\.php$">
+  Require all denied
+</FilesMatch>
+
+# Database dumps, notes, and other non-web files — never serve these.
+<FilesMatch "\.(sql|md|sqlite|ini|log|lock|bak)$">
+  Require all denied
+</FilesMatch>

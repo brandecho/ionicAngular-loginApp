@@ -1,0 +1,3 @@
+# Application code — never served over the web. The subdomain runs this code
+# via public/index.php; nothing should ever reach it directly through a URL.
+Require all denied
