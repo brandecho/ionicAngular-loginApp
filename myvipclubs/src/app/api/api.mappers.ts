@@ -51,6 +51,7 @@ export function toMember(r: ApiMemberRow): Member {
     phone: blankToUndef(str(r.phone)),
     linkedInUrl: blankToUndef(str(r.linkedin_url)),
     socialProfile: blankToUndef(str(r.social_profile)),
+    membershipPhotoUrl: blankToUndef(str(r.membership_photo_url)),
     preferences,
     memberSince: num(r.member_since) || new Date().getFullYear(),
     photo: '🕶️',

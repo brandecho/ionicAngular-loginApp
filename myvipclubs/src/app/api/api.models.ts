@@ -38,6 +38,7 @@ export interface ApiMemberRow {
   visits_this_year?: number | null;
   linkedin_url?: string | null;
   social_profile?: string | null;
+  membership_photo_url?: string | null;
   favorite_foods?: string | null;
   favorite_restaurants?: string | null;
   preferred_beverages?: string | null;

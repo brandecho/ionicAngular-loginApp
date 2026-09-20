@@ -34,6 +34,7 @@ try {
   // members
   if ($path === '/members/me' && $method === 'GET') Members::me();
   if ($path === '/members/me' && $method === 'PATCH') Members::update();
+  if ($path === '/members/me/photo' && $method === 'POST') Members::photo();
 
   // venues
   if ($path === '/venues' && $method === 'GET') Venues::list();

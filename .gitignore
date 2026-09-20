@@ -37,3 +37,4 @@ Icon
 
 # Locally generated distributable app bundles (build artifacts)
 *-app-local.zip
+*-api-update.zip

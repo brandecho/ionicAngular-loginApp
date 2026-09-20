@@ -34,4 +34,67 @@ final class Members {
     Db::run('UPDATE members SET ' . implode(', ', $set) . ' WHERE id = :id', $params);
     Response::json(Db::one('SELECT * FROM members WHERE id = :id', ['id' => $auth['memberId']]));
   }
+
+  /**
+   * POST /api/members/me/photo — upload or replace the member's profile photo.
+   * Send as multipart/form-data with a file field named "photo".
+   * The image is stored under public/uploads/members/ and served from the
+   * subdomain root (e.g. https://api.myvipclubs.com/uploads/members/<id>.jpg),
+   * and that public URL is saved to members.membership_photo_url.
+   */
+  public static function photo(): void {
+    $auth = requireAuth();
+    if (empty($auth['memberId'])) Response::error('no member profile', 404);
+    $memberId = $auth['memberId'];
+
+    $file = $_FILES['photo'] ?? null;
+    if (!$file || !is_uploaded_file($file['tmp_name'] ?? '')) {
+      Response::error('no file uploaded (use multipart field "photo")', 400);
+    }
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+      Response::error('upload failed (code ' . (int) $file['error'] . ')', 400);
+    }
+    if (($file['size'] ?? 0) > 5 * 1024 * 1024) {
+      Response::error('image too large (max 5 MB)', 413);
+    }
+
+    // Confirm it is really an image and pick a safe extension from its type.
+    $info = @getimagesize($file['tmp_name']);
+    $mime = $info['mime'] ?? '';
+    $extByMime = [
+      'image/jpeg' => 'jpg',
+      'image/png' => 'png',
+      'image/webp' => 'webp',
+      'image/gif' => 'gif',
+    ];
+    if (!isset($extByMime[$mime])) {
+      Response::error('only JPG, PNG, WEBP or GIF images are allowed', 415);
+    }
+    $ext = $extByMime[$mime];
+
+    $dir = __DIR__ . '/../../public/uploads/members';
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+      Response::error('could not create uploads folder on server', 500);
+    }
+
+    // Drop any previous photo for this member (whatever extension it had).
+    foreach (glob($dir . '/' . $memberId . '.*') ?: [] as $old) {
+      @unlink($old);
+    }
+
+    $filename = $memberId . '.' . $ext;
+    if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $filename)) {
+      Response::error('could not save the image on server', 500);
+    }
+    @chmod($dir . '/' . $filename, 0644);
+
+    // Absolute, publicly reachable URL (needed by the app AND by Twilio MMS).
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'api.myvipclubs.com';
+    $url = $scheme . '://' . $host . '/uploads/members/' . $filename . '?v=' . time();
+
+    Db::run('UPDATE members SET membership_photo_url = :u WHERE id = :id',
+      ['u' => $url, 'id' => $memberId]);
+    Response::json(Db::one('SELECT * FROM members WHERE id = :id', ['id' => $memberId]));
+  }
 }

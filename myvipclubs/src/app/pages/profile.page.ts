@@ -56,7 +56,17 @@ import { prefsToPatch, toMember } from '../api/api.mappers';
     <ion-content [fullscreen]="true">
       <div class="page">
         <div class="hero">
-          <div class="photo">{{ vip.member().photo }}</div>
+          <button class="photo" type="button" (click)="fileInput.click()" [disabled]="uploading()">
+            @if (vip.member().membershipPhotoUrl) {
+              <img [src]="vip.member().membershipPhotoUrl" alt="Profile photo" />
+            } @else {
+              <span class="emoji">{{ vip.member().photo }}</span>
+            }
+            <span class="cam">
+              <ion-icon [name]="uploading() ? 'time-outline' : 'camera-outline'"></ion-icon>
+            </span>
+          </button>
+          <input #fileInput type="file" accept="image/*" hidden (change)="onPhotoSelected($event)" />
           <h1>{{ vip.member().firstName }} {{ vip.member().lastName }}</h1>
           <span class="email">{{ vip.member().email }}</span>
           <div class="badges">
@@ -146,10 +156,19 @@ import { prefsToPatch, toMember } from '../api/api.mappers';
       .page { padding: 8px 18px 28px; max-width: 620px; margin: 0 auto; }
       .hero { text-align: center; padding: 8px 0 6px; }
       .photo {
-        width: 84px; height: 84px; margin: 0 auto 12px; border-radius: 50%;
-        display: grid; place-items: center; font-size: 40px;
-        background: var(--vip-surface-2); border: 2px solid var(--vip-gold);
+        position: relative; width: 92px; height: 92px; margin: 0 auto 12px; padding: 0;
+        border-radius: 50%; display: grid; place-items: center; font-size: 40px; overflow: visible;
+        background: var(--vip-surface-2); border: 2px solid var(--vip-gold); cursor: pointer;
       }
+      .photo img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+      .photo .emoji { line-height: 1; }
+      .photo .cam {
+        position: absolute; right: -2px; bottom: -2px; width: 30px; height: 30px; border-radius: 50%;
+        display: grid; place-items: center; background: var(--vip-gold); color: #14131b;
+        border: 2px solid var(--vip-bg, #0c0c13); box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      }
+      .photo .cam ion-icon { font-size: 15px; }
+      .photo[disabled] { opacity: 0.7; }
       h1 { margin: 0; font-size: 24px; font-weight: 800; color: #fff; }
       .email { color: var(--vip-muted); font-size: 13px; }
       .badges { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 12px; }
@@ -181,7 +200,33 @@ export class ProfilePage {
 
   editing = signal(false);
   saving = signal(false);
+  uploading = signal(false);
   draft: MemberPreferences = { ...this.vip.member().preferences };
+
+  async onPhotoSelected(ev: Event): Promise<void> {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = ''; // let the same file be picked again later
+    if (!file) return;
+    if (!this.api.isLoggedIn()) {
+      await this.showToast('Sign in to save a profile photo.', 'warning');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      await this.showToast('That image is over 5 MB — please pick a smaller one.', 'warning');
+      return;
+    }
+    this.uploading.set(true);
+    try {
+      const row = await this.api.uploadPhoto(file);
+      this.vip.setCurrentMember(toMember(row));
+      await this.showToast('Profile photo updated.', 'primary');
+    } catch {
+      await this.showToast("Couldn't upload the photo. Please try again.", 'danger');
+    } finally {
+      this.uploading.set(false);
+    }
+  }
 
   async toggleEdit(): Promise<void> {
     if (!this.editing()) {

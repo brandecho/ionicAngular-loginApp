@@ -53,6 +53,7 @@ import {
   chevronForwardOutline,
   createOutline,
   informationCircleOutline,
+  cameraOutline,
 } from 'ionicons/icons';
 
 export function registerAppIcons(): void {
@@ -110,5 +111,6 @@ export function registerAppIcons(): void {
     'chevron-forward-outline': chevronForwardOutline,
     'create-outline': createOutline,
     'information-circle-outline': informationCircleOutline,
+    'camera-outline': cameraOutline,
   });
 }

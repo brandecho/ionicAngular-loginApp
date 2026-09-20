@@ -72,6 +72,18 @@ export class ApiService {
     );
   }
 
+  /** Upload/replace the member's profile photo (multipart). Returns the row. */
+  uploadPhoto(file: File): Promise<ApiMemberRow> {
+    const form = new FormData();
+    form.append('photo', file, file.name);
+    // Note: don't set Content-Type — the browser adds the multipart boundary.
+    return firstValueFrom(
+      this.http.post<ApiMemberRow>(`${this.base}/members/me/photo`, form, {
+        headers: this.authHeaders(),
+      }),
+    );
+  }
+
   // ---------------- venues ----------------
   venues(): Promise<ApiVenueRow[]> {
     return firstValueFrom(this.http.get<ApiVenueRow[]>(`${this.base}/venues`));
