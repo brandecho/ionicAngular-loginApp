@@ -133,7 +133,7 @@ import { BasicInfoDraft, basicToPatch, prefsToPatch, toMember } from '../api/api
         </ion-list>
 
         <div class="section-label">
-          My tastes
+          My preferences
           <button class="edit" (click)="toggleEdit()">
             <ion-icon [name]="editing() ? 'checkmark-outline' : 'create-outline'"></ion-icon>
             {{ editing() ? 'Save' : 'Edit' }}
