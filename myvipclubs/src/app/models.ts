@@ -54,28 +54,83 @@ export interface VenueRequest {
   note?: string;
 }
 
+/**
+ * VIP preferences + recognition — mirrors the JotForm membership application
+ * (Section 5 "Your VIP Preferences" and Section 6 "Member Profile & Recognition").
+ * This is the data participating venues see so they can personalize service.
+ */
 export interface MemberPreferences {
-  favoriteDrink: string;
-  secondDrink: string;
-  spirit: string;
-  seating: string;
-  music: string;
-  allergies: string;
-  celebration: string;
-  notes: string;
+  favoriteFoods: string; // Favorite foods / cuisines
+  favoriteRestaurants: string; // Favorite restaurants or types of restaurants
+  preferredBeverages: string; // Preferred beverages / cocktails
+  dietaryRestrictions: string; // Dietary restrictions, food allergies, or sensitivities
+  favoriteWineSpirits: string; // Favorite wine, spirits, beer, or non-alcoholic
+  preferredSeating: string; // Preferred seating
+  preferredAtmosphere: string; // Preferred atmosphere
+  music: string; // Music / entertainment preferences
+  smoking: string; // Smoking / cigar preferences
+  specialOccasions: string; // Typical special occasions (checkbox list, joined)
+  hospitalityDetails: string; // Any hospitality details a venue should know
+  whatMakesVip: string; // What makes an experience feel truly VIP to you?
+  doNotShare: string; // Details you do NOT want shared with venues
+  additionalNotes: string; // Optional additional notes for recognition
+  consentShareWithVenues: boolean; // Consent to share preferences with venues
+}
+
+/** Section 2 — Your Referral. */
+export interface MemberReferral {
+  firstName: string;
+  lastName: string;
+  vipNumber: string; // Referring Member's VIP Number
+  relationship: string; // Your relationship to the referring member
+  knownDuration: string; // How long you've known them
+  knowsYouPersonally: boolean; // Does the referring member know you personally?
+}
+
+export interface PostalAddress {
+  street1: string;
+  street2?: string;
+  city: string;
+  state: string;
+  postal: string;
 }
 
 export interface Member {
   id: string;
-  firstName: string;
-  lastName: string;
+  // ----- Section 1: About You -----
+  firstName: string; // Full Legal Name — first
+  lastName: string; // Full Legal Name — last
+  preferredName?: string; // Preferred Name / Nickname
+  over21?: boolean; // Are you 21 or older?
   email: string;
+  phone?: string; // NOTE: not on the JotForm yet — needed for SMS alerts
+  homeAddress?: PostalAddress;
+  linkedInUrl?: string;
+  socialProfile?: string; // Instagram or other social
+  relationshipStatus?: string;
+  howHeard?: string; // How did you hear about MyVIPClubs?
+  // ----- Section 2: Referral -----
+  referral?: MemberReferral;
+  // ----- Section 3: Professional -----
+  employer?: string;
+  industry?: string;
+  jobTitle?: string;
+  isBusinessOwner?: boolean;
+  // ----- Section 4: Membership & Interests -----
+  establishmentTypes?: string[]; // Upscale restaurants, Lounges, Nightlife, ...
+  visitFrequency?: string;
+  visitCompany?: string; // alone / couple / group
+  interestedInEvents?: boolean;
+  interestedInOffers?: boolean;
+  // ----- Section 5 & 6: Preferences + recognition -----
+  preferences: MemberPreferences;
+  membershipPhotoUrl?: string; // membership-card photo
+  // ----- App/derived -----
   memberSince: number; // year
-  photo: string; // emoji stand-in
+  photo: string; // emoji stand-in for avatar
   totalSpent: number;
   totalTips: number;
   visitsThisYear: number;
-  preferences: MemberPreferences;
   favoriteVenueIds: string[];
   favoriteStaffIds: string[];
   /** Set when the member is currently inbound to a venue (venue-side "tonight"). */

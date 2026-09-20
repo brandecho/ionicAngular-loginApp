@@ -70,15 +70,20 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
         </div>
 
         <div class="section">How to take care of {{ member().firstName }}</div>
+        @if (prefs().consentShareWithVenues === false) {
+          <div class="privacy"><ion-icon name="eye-outline"></ion-icon> Member has limited sharing — use discretion.</div>
+        }
         <div class="prefs">
-          <div class="pref"><ion-icon name="wine-outline"></ion-icon><span><em>Go-to drink</em>{{ prefs().favoriteDrink }}</span></div>
-          <div class="pref"><ion-icon name="sparkles-outline"></ion-icon><span><em>Celebration</em>{{ prefs().secondDrink }}</span></div>
-          <div class="pref"><ion-icon name="flash-outline"></ion-icon><span><em>Spirit</em>{{ prefs().spirit }}</span></div>
-          <div class="pref"><ion-icon name="restaurant-outline"></ion-icon><span><em>Seating</em>{{ prefs().seating }}</span></div>
-          <div class="pref"><ion-icon name="musical-notes-outline"></ion-icon><span><em>Music</em>{{ prefs().music }}</span></div>
-          <div class="pref warn"><ion-icon name="shield-checkmark-outline"></ion-icon><span><em>Allergies</em>{{ prefs().allergies }}</span></div>
-          <div class="pref"><ion-icon name="gift-outline"></ion-icon><span><em>Occasion</em>{{ prefs().celebration }}</span></div>
-          <div class="pref"><ion-icon name="ribbon-outline"></ion-icon><span><em>Notes</em>{{ prefs().notes }}</span></div>
+          <div class="pref"><ion-icon name="wine-outline"></ion-icon><span><em>Beverages</em>{{ prefs().preferredBeverages || '—' }}</span></div>
+          <div class="pref"><ion-icon name="sparkles-outline"></ion-icon><span><em>Wine / spirits</em>{{ prefs().favoriteWineSpirits || '—' }}</span></div>
+          <div class="pref"><ion-icon name="restaurant-outline"></ion-icon><span><em>Food & restaurants</em>{{ prefs().favoriteFoods || prefs().favoriteRestaurants || '—' }}</span></div>
+          <div class="pref warn"><ion-icon name="shield-checkmark-outline"></ion-icon><span><em>Dietary / allergies</em>{{ prefs().dietaryRestrictions || 'None noted' }}</span></div>
+          <div class="pref"><ion-icon name="wine-outline"></ion-icon><span><em>Seating</em>{{ prefs().preferredSeating || '—' }}</span></div>
+          <div class="pref"><ion-icon name="sparkles-outline"></ion-icon><span><em>Atmosphere</em>{{ prefs().preferredAtmosphere || '—' }}</span></div>
+          <div class="pref"><ion-icon name="musical-notes-outline"></ion-icon><span><em>Music</em>{{ prefs().music || '—' }}</span></div>
+          <div class="pref"><ion-icon name="flash-outline"></ion-icon><span><em>Smoking / cigar</em>{{ prefs().smoking || '—' }}</span></div>
+          <div class="pref"><ion-icon name="gift-outline"></ion-icon><span><em>Occasions</em>{{ prefs().specialOccasions || '—' }}</span></div>
+          <div class="pref"><ion-icon name="ribbon-outline"></ion-icon><span><em>Notes</em>{{ prefs().hospitalityDetails || prefs().additionalNotes || '—' }}</span></div>
         </div>
 
         @if (!welcomed()) {
@@ -136,6 +141,8 @@ import { TierBadgeComponent } from '../components/tier-badge.component';
       .arriving-at ion-icon { font-size: 15px; }
 
       .section { color: var(--vip-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin: 22px 4px 12px; }
+      .privacy { display: flex; align-items: center; gap: 7px; color: var(--vip-gold-soft); font-size: 12.5px; background: var(--vip-gold-tint); border: 1px solid color-mix(in srgb, var(--vip-gold) 35%, transparent); border-radius: 10px; padding: 8px 12px; margin: 0 0 12px; }
+      .privacy ion-icon { font-size: 15px; }
       .prefs { display: flex; flex-direction: column; gap: 2px; background: var(--vip-surface); border: 1px solid var(--vip-border); border-radius: 16px; overflow: hidden; }
       .pref { display: flex; align-items: flex-start; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--vip-border); }
       .pref:last-child { border-bottom: none; }

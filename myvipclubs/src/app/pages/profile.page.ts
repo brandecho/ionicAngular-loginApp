@@ -78,36 +78,60 @@ import { MemberPreferences } from '../models';
 
         <ion-list class="prefs" lines="full">
           <ion-item>
+            <ion-icon slot="start" name="restaurant-outline"></ion-icon>
+            <ion-input label="Favorite foods / cuisines" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.favoriteFoods"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="business-outline"></ion-icon>
+            <ion-input label="Favorite restaurants" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.favoriteRestaurants"></ion-input>
+          </ion-item>
+          <ion-item>
             <ion-icon slot="start" name="wine-outline"></ion-icon>
-            <ion-input label="Go-to drink" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.favoriteDrink"></ion-input>
+            <ion-input label="Preferred beverages / cocktails" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.preferredBeverages"></ion-input>
           </ion-item>
           <ion-item>
             <ion-icon slot="start" name="sparkles-outline"></ion-icon>
-            <ion-input label="Celebration drink" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.secondDrink"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-icon slot="start" name="flash-outline"></ion-icon>
-            <ion-input label="Preferred spirit" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.spirit"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-icon slot="start" name="restaurant-outline"></ion-icon>
-            <ion-input label="Seating" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.seating"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-icon slot="start" name="musical-notes-outline"></ion-icon>
-            <ion-input label="Music" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.music"></ion-input>
+            <ion-input label="Favorite wine, spirits, beer" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.favoriteWineSpirits"></ion-input>
           </ion-item>
           <ion-item>
             <ion-icon slot="start" name="shield-checkmark-outline"></ion-icon>
-            <ion-input label="Allergies" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.allergies"></ion-input>
+            <ion-input label="Dietary restrictions / allergies" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.dietaryRestrictions"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="wine-outline"></ion-icon>
+            <ion-input label="Preferred seating" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.preferredSeating"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="sparkles-outline"></ion-icon>
+            <ion-input label="Preferred atmosphere" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.preferredAtmosphere"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="musical-notes-outline"></ion-icon>
+            <ion-input label="Music / entertainment" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.music"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="flash-outline"></ion-icon>
+            <ion-input label="Smoking / cigar preferences" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.smoking"></ion-input>
           </ion-item>
           <ion-item>
             <ion-icon slot="start" name="gift-outline"></ion-icon>
-            <ion-input label="Celebration / dates" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.celebration"></ion-input>
+            <ion-input label="Special occasions" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.specialOccasions"></ion-input>
           </ion-item>
           <ion-item>
             <ion-icon slot="start" name="ribbon-outline"></ion-icon>
-            <ion-textarea label="Notes for the house" labelPlacement="stacked" [autoGrow]="true" [readonly]="!editing()" [(ngModel)]="draft.notes"></ion-textarea>
+            <ion-textarea label="Hospitality details a venue should know" labelPlacement="stacked" [autoGrow]="true" [readonly]="!editing()" [(ngModel)]="draft.hospitalityDetails"></ion-textarea>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="star-outline"></ion-icon>
+            <ion-textarea label="What makes an experience feel VIP to you?" labelPlacement="stacked" [autoGrow]="true" [readonly]="!editing()" [(ngModel)]="draft.whatMakesVip"></ion-textarea>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="eye-outline"></ion-icon>
+            <ion-input label="Details you do NOT want shared" labelPlacement="stacked" [readonly]="!editing()" [(ngModel)]="draft.doNotShare"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-icon slot="start" name="create-outline"></ion-icon>
+            <ion-textarea label="Additional notes for recognition" labelPlacement="stacked" [autoGrow]="true" [readonly]="!editing()" [(ngModel)]="draft.additionalNotes"></ion-textarea>
           </ion-item>
         </ion-list>
 
