@@ -79,6 +79,11 @@ export class VipService {
   }
 
   tierForMember(m: Member): Tier {
+    // An admin-assigned level (members.tier) wins; otherwise derive from spend.
+    if (m.assignedTier) {
+      const assigned = TIERS.find((t) => t.id === m.assignedTier);
+      if (assigned) return assigned;
+    }
     return this.tierForValue(this.lifetimeValueOf(m));
   }
 

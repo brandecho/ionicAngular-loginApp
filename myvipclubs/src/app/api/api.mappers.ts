@@ -84,6 +84,10 @@ export function toMember(r: ApiMemberRow): Member {
     howHeard: blankToUndef(str(r.how_heard)),
     preferences,
     memberSince: num(r.member_since) || new Date().getFullYear(),
+    assignedTier: (() => {
+      const t = str(r.tier) as TierId;
+      return TIERS.includes(t) ? t : undefined;
+    })(),
     photo: '🕶️',
     totalSpent: num(r.total_spent),
     totalTips: num(r.total_tips),

@@ -127,6 +127,8 @@ export interface Member {
   membershipPhotoUrl?: string; // membership-card photo
   // ----- App/derived -----
   memberSince: number; // year
+  /** Level set by an admin (members.tier). Overrides the spend-based tier. */
+  assignedTier?: TierId;
   photo: string; // emoji stand-in for avatar
   totalSpent: number;
   totalTips: number;
