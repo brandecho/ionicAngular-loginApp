@@ -23,9 +23,10 @@ final class Auth {
 
     $memberId = uuid4();
     Db::run(
-      "INSERT INTO members (id, first_name, last_name, email, phone, application_status)
-       VALUES (:id,:first,:last,:email,:phone,'pending')",
-      ['id' => $memberId, 'first' => $first, 'last' => $last, 'email' => $email, 'phone' => $phone ?: null]
+      "INSERT INTO members (id, first_name, last_name, email, phone, member_since, application_status)
+       VALUES (:id,:first,:last,:email,:phone,:since,'pending')",
+      ['id' => $memberId, 'first' => $first, 'last' => $last, 'email' => $email,
+       'phone' => $phone ?: null, 'since' => (int) date('Y')]
     );
 
     $accountId = uuid4();
