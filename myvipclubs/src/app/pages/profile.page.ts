@@ -19,6 +19,8 @@ import {
 import { VipService } from '../vip.service';
 import { TierBadgeComponent } from '../components/tier-badge.component';
 import { MemberPreferences } from '../models';
+import { ApiService } from '../api/api.service';
+import { prefsToPatch, toMember } from '../api/api.mappers';
 
 @Component({
   selector: 'app-profile',
@@ -173,27 +175,54 @@ import { MemberPreferences } from '../models';
 })
 export class ProfilePage {
   vip = inject(VipService);
+  private api = inject(ApiService);
   private router = inject(Router);
   private toast = inject(ToastController);
 
   editing = signal(false);
+  saving = signal(false);
   draft: MemberPreferences = { ...this.vip.member().preferences };
 
-  toggleEdit(): void {
-    if (this.editing()) {
-      this.vip.updatePreferences({ ...this.draft });
-      this.editing.set(false);
-      this.toast
-        .create({ message: 'Preferences saved.', duration: 1600, position: 'top', color: 'primary' })
-        .then((t) => t.present());
-    } else {
+  async toggleEdit(): Promise<void> {
+    if (!this.editing()) {
+      // Enter edit mode with a fresh copy of the current preferences.
       this.draft = { ...this.vip.member().preferences };
       this.editing.set(true);
+      return;
+    }
+    // Save.
+    if (this.saving()) return;
+    if (this.api.isLoggedIn()) {
+      this.saving.set(true);
+      try {
+        const row = await this.api.updateMe(prefsToPatch(this.draft));
+        this.vip.setCurrentMember(toMember(row));
+        this.editing.set(false);
+        await this.showToast('Preferences saved to your profile.', 'primary');
+      } catch {
+        // Keep them in edit mode so nothing is lost; save locally as a backstop.
+        this.vip.updatePreferences({ ...this.draft });
+        await this.showToast("Saved on this device — couldn't reach the server.", 'warning');
+        this.editing.set(false);
+      } finally {
+        this.saving.set(false);
+      }
+    } else {
+      // Demo mode (not signed in against the API).
+      this.vip.updatePreferences({ ...this.draft });
+      this.editing.set(false);
+      await this.showToast('Preferences saved.', 'primary');
     }
   }
 
   logout(): void {
+    this.api.logout();
     this.vip.logout();
     this.router.navigateByUrl('/login');
+  }
+
+  private async showToast(message: string, color: string): Promise<void> {
+    const t = await this.toast.create({ message, duration: 1800, position: 'top', color });
+    await t.present();
   }
 }

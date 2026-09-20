@@ -13,6 +13,9 @@ import {
 import { VipService } from '../vip.service';
 import { AccountService } from '../accounts/account.service';
 import { Account } from '../accounts/account.models';
+import { ApiService } from '../api/api.service';
+import { ApiAccount } from '../api/api.models';
+import { toMember, toVenue } from '../api/api.mappers';
 
 interface DemoPersona {
   accountId: string;
@@ -108,11 +111,13 @@ interface DemoPersona {
 export class LoginPage {
   private vip = inject(VipService);
   private accounts = inject(AccountService);
+  private api = inject(ApiService);
   private router = inject(Router);
   private toast = inject(ToastController);
 
   email = '';
   password = '';
+  busy = false;
 
   personas: DemoPersona[] = [
     { accountId: 'acct_member_alex', emoji: '🕶️', label: 'Member', sub: 'Alex Morgan · Platinum' },
@@ -124,18 +129,70 @@ export class LoginPage {
   ];
 
   async signIn(): Promise<void> {
-    const acct = this.accounts.login(this.email, this.password);
-    if (!acct) {
-      const t = await this.toast.create({
-        message: 'Email or password not recognized. Try a demo account below.',
-        duration: 2400,
-        position: 'top',
-        color: 'danger',
-      });
-      await t.present();
+    const email = this.email.trim();
+    const password = this.password;
+    if (!email || !password) {
+      await this.showError('Enter your email and password.');
       return;
     }
-    this.enter(acct);
+    if (this.busy) return;
+    this.busy = true;
+    try {
+      // 1) Try the real backend (api.myvipclubs.com).
+      const acct = await this.api.login({ email, password });
+      await this.enterLive(acct);
+      return;
+    } catch (err) {
+      // 2) Fall back to the built-in demo accounts (owner/manager/admin, etc.).
+      const mock = this.accounts.login(email, password);
+      if (mock) {
+        this.enter(mock);
+        return;
+      }
+      await this.showError(this.loginErrorMessage(err));
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  /** Route a member signed in against the live API. */
+  private async enterLive(acct: ApiAccount): Promise<void> {
+    // Load the live venue catalogue for everyone.
+    try {
+      this.vip.setVenues((await this.api.venues()).map(toVenue));
+    } catch {
+      /* keep whatever venues we already have */
+    }
+    if (acct.role === 'member') {
+      const row = await this.api.me();
+      this.vip.setCurrentMember(toMember(row));
+      this.router.navigateByUrl('/tabs/home');
+    } else if (acct.role === 'owner' || acct.role === 'manager') {
+      this.router.navigateByUrl(acct.venueId ? `/venue-portal/${acct.venueId}` : '/venue-portal');
+    } else if (acct.role === 'admin') {
+      this.router.navigateByUrl('/admin');
+    } else {
+      this.router.navigateByUrl('/tabs/home');
+    }
+  }
+
+  private loginErrorMessage(err: unknown): string {
+    const status = (err as { status?: number })?.status;
+    if (status === 401) return 'Email or password not recognized. Try a demo account below.';
+    if (status === 0 || status === undefined) {
+      return "Can't reach the server. Check your connection (and that the API's SSL is on).";
+    }
+    return 'Something went wrong signing in. Please try again.';
+  }
+
+  private async showError(message: string): Promise<void> {
+    const t = await this.toast.create({
+      message,
+      duration: 2600,
+      position: 'top',
+      color: 'danger',
+    });
+    await t.present();
   }
 
   demoLogin(accountId: string): void {

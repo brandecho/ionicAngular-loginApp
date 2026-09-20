@@ -15,11 +15,14 @@ import {
   IonInput,
   IonSelect,
   IonSelectOption,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { VipService } from '../vip.service';
 import { AccountService } from '../accounts/account.service';
 import { StaffRole } from '../accounts/account.models';
 import { Venue } from '../models';
+import { ApiService } from '../api/api.service';
+import { toMember, toVenue } from '../api/api.mappers';
 
 type Role = 'member' | 'venue' | 'staff';
 type Step = 'choose' | 'form' | 'done';
@@ -117,8 +120,8 @@ type Step = 'choose' | 'form' | 'done';
 
             <p class="sms-note"><ion-icon name="chatbubble-ellipses-outline"></ion-icon> We'll text important updates to your mobile — standard rates apply.</p>
 
-            <ion-button expand="block" class="cta" [disabled]="!valid()" (click)="submit()">
-              {{ role() === 'member' ? 'Create account' : 'Submit for approval' }}
+            <ion-button expand="block" class="cta" [disabled]="!valid() || busy()" (click)="submit()">
+              {{ busy() ? 'Creating…' : role() === 'member' ? 'Create account' : 'Submit for approval' }}
             </ion-button>
           }
 
@@ -170,8 +173,11 @@ type Step = 'choose' | 'form' | 'done';
 export class RegisterPage {
   private vip = inject(VipService);
   private accounts = inject(AccountService);
+  private api = inject(ApiService);
   private router = inject(Router);
+  private toast = inject(ToastController);
 
+  busy = signal(false);
   step = signal<Step>('choose');
   role = signal<Role>('member');
   private lastMembershipId = signal<string>('');
@@ -214,16 +220,31 @@ export class RegisterPage {
     return base;
   }
 
-  submit(): void {
+  async submit(): Promise<void> {
     if (this.role() === 'member') {
-      this.accounts.registerMember({
-        name: this.f.name,
-        email: this.f.email,
-        phone: this.f.phone,
-        password: this.f.password,
-      });
-      this.vip.login(this.f.email, this.f.password);
-      this.router.navigateByUrl('/tabs/home');
+      if (this.busy()) return;
+      this.busy.set(true);
+      try {
+        // Create the account in the live database on the server.
+        await this.api.register({
+          name: this.f.name,
+          email: this.f.email,
+          phone: this.f.phone,
+          password: this.f.password,
+        });
+        try {
+          this.vip.setVenues((await this.api.venues()).map(toVenue));
+        } catch {
+          /* venues optional */
+        }
+        const row = await this.api.me();
+        this.vip.setCurrentMember(toMember(row));
+        this.router.navigateByUrl('/tabs/home');
+      } catch (err) {
+        await this.showError(this.registerErrorMessage(err));
+      } finally {
+        this.busy.set(false);
+      }
       return;
     }
     if (this.role() === 'venue') {
@@ -272,5 +293,25 @@ export class RegisterPage {
 
   goHome(): void {
     this.router.navigateByUrl('/login');
+  }
+
+  private registerErrorMessage(err: unknown): string {
+    const status = (err as { status?: number })?.status;
+    if (status === 409) return 'That email is already registered. Try signing in instead.';
+    if (status === 400) return 'Please fill in your name, email and password.';
+    if (status === 0 || status === undefined) {
+      return "Can't reach the server. Check your connection (and that the API's SSL is on).";
+    }
+    return 'Something went wrong creating your account. Please try again.';
+  }
+
+  private async showError(message: string): Promise<void> {
+    const t = await this.toast.create({
+      message,
+      duration: 2800,
+      position: 'top',
+      color: 'danger',
+    });
+    await t.present();
   }
 }

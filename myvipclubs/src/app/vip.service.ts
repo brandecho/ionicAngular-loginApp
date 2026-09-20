@@ -14,7 +14,9 @@ import {
 @Injectable({ providedIn: 'root' })
 export class VipService {
   readonly tiers = TIERS;
-  private readonly currentMemberId = 'm1';
+  // The signed-in member. Starts on the demo member ('m1'); a live API login
+  // replaces it via setCurrentMember().
+  private readonly _currentMemberId = signal('m1');
 
   private readonly _authed = signal(false);
   private readonly _members = signal<Member[]>(structuredClone(MEMBERS));
@@ -32,13 +34,36 @@ export class VipService {
   }
   logout(): void {
     this._authed.set(false);
+    this._currentMemberId.set('m1');
+  }
+
+  // ----- live (API-backed) data -----
+  /**
+   * Make a real, API-loaded member the current signed-in member. Inserts or
+   * replaces them in the members list and points the app at them.
+   */
+  setCurrentMember(m: Member): void {
+    this._members.update((ms) => {
+      const i = ms.findIndex((x) => x.id === m.id);
+      if (i === -1) return [m, ...ms];
+      const copy = [...ms];
+      copy[i] = m;
+      return copy;
+    });
+    this._currentMemberId.set(m.id);
+    this._authed.set(true);
+  }
+
+  /** Replace the venue catalogue with venues loaded from the API. */
+  setVenues(vs: Venue[]): void {
+    if (vs.length) this._venues.set(vs);
   }
 
   // ----- members -----
   readonly members = this._members.asReadonly();
 
   readonly member = computed<Member>(
-    () => this._members().find((m) => m.id === this.currentMemberId) ?? this._members()[0],
+    () => this._members().find((m) => m.id === this._currentMemberId()) ?? this._members()[0],
   );
 
   memberById(id: string): Member | undefined {
@@ -116,7 +141,7 @@ export class VipService {
   }
 
   toggleFavoriteVenue(id: string): void {
-    this.updateMember(this.currentMemberId, (m) => {
+    this.updateMember(this._currentMemberId(), (m) => {
       const favs = new Set(m.favoriteVenueIds);
       favs.has(id) ? favs.delete(id) : favs.add(id);
       return { ...m, favoriteVenueIds: [...favs] };
@@ -160,7 +185,7 @@ export class VipService {
     const live = this._checkIns().find(
       (c) => c.venueId === venueId && c.status !== 'welcomed',
     );
-    if (live && !out.some((o) => o.member.id === this.currentMemberId)) {
+    if (live && !out.some((o) => o.member.id === this._currentMemberId())) {
       out.unshift({
         member: this.member(),
         etaMinutes: this._managerAlert()?.etaMinutes ?? 2,
@@ -178,7 +203,7 @@ export class VipService {
   requestStatus(venueId: string): RequestStatus | null {
     return (
       this._requests().find(
-        (r) => r.venueId === venueId && r.memberId === this.currentMemberId,
+        (r) => r.venueId === venueId && r.memberId === this._currentMemberId(),
       )?.status ?? null
     );
   }
@@ -189,7 +214,7 @@ export class VipService {
     this._requests.update((rs) => [
       ...rs,
       {
-        memberId: this.currentMemberId,
+        memberId: this._currentMemberId(),
         venueId,
         status: 'requested',
         requestedAt: Date.now(),
@@ -230,7 +255,7 @@ export class VipService {
         ? m
         : { ...m, favoriteVenueIds: [...m.favoriteVenueIds, venueId] },
     );
-    if (memberId === this.currentMemberId) {
+    if (memberId === this._currentMemberId()) {
       this._venues.update((vs) =>
         vs.map((v) => (v.id === venueId ? { ...v, isMember: true } : v)),
       );
@@ -280,7 +305,7 @@ export class VipService {
 
   // ----- profile edits (current member) -----
   updatePreferences(patch: Partial<Member['preferences']>): void {
-    this.updateMember(this.currentMemberId, (m) => ({
+    this.updateMember(this._currentMemberId(), (m) => ({
       ...m,
       preferences: { ...m.preferences, ...patch },
     }));
