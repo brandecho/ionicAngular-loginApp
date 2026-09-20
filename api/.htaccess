@@ -1,0 +1,13 @@
+# -----------------------------------------------------------------------------
+# Security lock for the API folder.
+#
+# The API is meant to be served ONLY through the api.myvipclubs.com subdomain,
+# whose document root is the child "public/" folder. This file blocks the main
+# website (e.g. myvipclubs.com/api/...) from reaching the private files that
+# live here — config.php (database password), src/ (code), and the .sql files.
+#
+# Apache does not read this file for the subdomain (its document root is the
+# public/ subfolder below), so it does NOT block the real API — only direct
+# access to this folder from other domains.
+# -----------------------------------------------------------------------------
+Require all denied
