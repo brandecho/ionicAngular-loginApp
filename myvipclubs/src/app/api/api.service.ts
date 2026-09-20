@@ -72,6 +72,29 @@ export class ApiService {
     );
   }
 
+  /** Submit the membership application (free long form or fast-track short form). */
+  submitApplication(payload: Record<string, unknown>): Promise<ApiMemberRow> {
+    return firstValueFrom(
+      this.http.post<ApiMemberRow>(`${this.base}/members/me/application`, payload, {
+        headers: this.authHeaders(),
+      }),
+    );
+  }
+
+  /**
+   * Start the $25 fast-track payment. Returns {configured:false} when Stripe
+   * isn't set up yet, or {url} to redirect the browser to Stripe Checkout.
+   */
+  startApplicationCheckout(): Promise<{ configured: boolean; url?: string; alreadyPaid?: boolean }> {
+    return firstValueFrom(
+      this.http.post<{ configured: boolean; url?: string; alreadyPaid?: boolean }>(
+        `${this.base}/payments/application/checkout`,
+        {},
+        { headers: this.authHeaders() },
+      ),
+    );
+  }
+
   /** Upload/replace the member's profile photo (multipart). Returns the row. */
   uploadPhoto(file: File): Promise<ApiMemberRow> {
     const form = new FormData();

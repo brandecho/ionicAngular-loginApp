@@ -59,6 +59,95 @@ final class Members {
     Response::json(Db::one('SELECT * FROM members WHERE id = :id', ['id' => $mid]));
   }
 
+  // ---- membership application fields ----
+  private const APP_TEXT = [
+    'first_name', 'last_name', 'preferred_name', 'email', 'phone',
+    'address_street1', 'address_street2', 'address_city', 'address_state', 'address_postal',
+    'linkedin_url', 'social_profile', 'relationship_status', 'how_heard',
+    'referral_first', 'referral_last', 'referral_vip_number', 'referral_relationship',
+    'referral_known_duration',
+    'employer', 'industry', 'job_title',
+    'visit_frequency', 'visit_company',
+    'favorite_foods', 'favorite_restaurants', 'preferred_beverages', 'dietary_restrictions',
+    'favorite_wine_spirits', 'preferred_seating', 'preferred_atmosphere', 'music', 'smoking',
+    'hospitality_details', 'what_makes_vip', 'do_not_share', 'additional_notes',
+  ];
+  private const APP_BOOL = [
+    'over_21', 'is_business_owner', 'referral_knows_personally',
+    'interested_events', 'interested_offers', 'consent_share_with_venues',
+    'standards_ack', 'gratuity_agreed', 'privacy_consented',
+    'authorize_verification', 'final_certification',
+  ];
+  private const APP_JSON = ['establishment_types', 'special_occasions'];
+
+  /**
+   * POST /api/members/me/application — submit the membership application.
+   * Body carries the JotForm-style fields (snake_case) plus "plan"
+   * ('free' | 'fast_track'). Stamps the submission date and keeps the member
+   * 'pending' for admin review. The fast-track fee is handled separately via
+   * Stripe (see Payments); this just records which plan was chosen.
+   */
+  public static function submitApplication(): void {
+    $auth = requireAuth();
+    $mid = $auth['memberId'] ?? '';
+    if (!$mid) Response::error('no member profile', 404);
+    $b = body();
+
+    // Keep the login email in sync if it changed.
+    if (array_key_exists('email', $b)) {
+      $email = trim((string) $b['email']);
+      if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        Response::error('a valid email is required', 400);
+      }
+      $taken = Db::one(
+        'SELECT id FROM accounts WHERE email = :e AND (member_id IS NULL OR member_id <> :mid)',
+        ['e' => $email, 'mid' => $mid]
+      );
+      if ($taken) Response::error('that email is already in use', 409);
+      Db::run('UPDATE accounts SET email = :e WHERE member_id = :mid', ['e' => $email, 'mid' => $mid]);
+      $b['email'] = $email;
+    }
+
+    $set = [];
+    $params = ['id' => $mid];
+    foreach (self::APP_TEXT as $c) {
+      if (array_key_exists($c, $b)) {
+        $set[] = "$c = :$c";
+        $params[$c] = ($b[$c] === '') ? null : $b[$c];
+      }
+    }
+    foreach (self::APP_BOOL as $c) {
+      if (array_key_exists($c, $b)) {
+        $set[] = "$c = :$c";
+        $params[$c] = self::truthy($b[$c]) ? 1 : 0;
+      }
+    }
+    foreach (self::APP_JSON as $c) {
+      if (array_key_exists($c, $b)) {
+        $set[] = "$c = :$c";
+        $v = $b[$c];
+        $params[$c] = is_array($v)
+          ? json_encode(array_values($v))
+          : ((is_string($v) && $v !== '') ? $v : null);
+      }
+    }
+
+    // Plan + submission stamp.
+    $plan = ($b['plan'] ?? 'free') === 'fast_track' ? 'fast_track' : 'free';
+    $set[] = 'application_plan = :plan';
+    $params['plan'] = $plan;
+    $set[] = "application_status = 'pending'";
+    $set[] = 'application_date = :appdate';
+    $params['appdate'] = date('Y-m-d');
+
+    Db::run('UPDATE members SET ' . implode(', ', $set) . ' WHERE id = :id', $params);
+    Response::json(Db::one('SELECT * FROM members WHERE id = :id', ['id' => $mid]));
+  }
+
+  private static function truthy($v): bool {
+    return $v === true || $v === 1 || $v === '1' || $v === 'true' || $v === 'yes' || $v === 'on';
+  }
+
   /**
    * POST /api/members/me/photo — upload or replace the member's profile photo.
    * Send as multipart/form-data with a file field named "photo".

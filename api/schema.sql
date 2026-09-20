@@ -96,6 +96,9 @@ CREATE TABLE IF NOT EXISTS members (
   final_certification      TINYINT(1)   NULL,
   application_date         DATE         NULL,
   application_status       ENUM('pending','approved','declined') NOT NULL DEFAULT 'pending',
+  application_plan         VARCHAR(20)  NULL,          -- 'free' (long form) | 'fast_track' ($25 short form)
+  application_fee_paid     TINYINT(1)   NOT NULL DEFAULT 0,
+  stripe_checkout_id       VARCHAR(120) NULL,          -- Stripe Checkout Session id (fast_track)
 
   -- App / derived
   tier                     ENUM('silver','gold','platinum','black','noir') NULL,

@@ -27,4 +27,19 @@ return [
 
   // Optional shared secret appended to the JotForm webhook URL (?token=...)
   'jotform_webhook_token' => '',
+
+  // Stripe (fast-track $25 application fee). Leave blank to keep payments
+  // dormant — the app will show "payments not enabled yet" and still save the
+  // application. Fill these once you create a Stripe account.
+  'stripe' => [
+    'secret_key'      => '',      // sk_test_... or sk_live_...
+    'publishable_key' => '',      // pk_test_... or pk_live_... (not strictly needed for Checkout)
+    'webhook_secret'  => '',      // whsec_... from the Stripe webhook you create
+    'price_cents'     => 2500,    // $25.00
+    'currency'        => 'usd',
+    // Where Stripe sends the applicant back after paying / cancelling.
+    // Point these at your app. {CHECKOUT_SESSION_ID} is filled in by Stripe.
+    'success_url'     => 'http://localhost:8888/myvipclubs/app/?paid=1&session_id={CHECKOUT_SESSION_ID}#/apply',
+    'cancel_url'      => 'http://localhost:8888/myvipclubs/app/?paid=0#/apply',
+  ],
 ];

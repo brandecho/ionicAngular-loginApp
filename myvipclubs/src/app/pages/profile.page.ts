@@ -75,6 +75,12 @@ import { BasicInfoDraft, basicToPatch, prefsToPatch, toMember } from '../api/api
           </div>
         </div>
 
+        <button class="apply-cta" (click)="openApplication()">
+          <ion-icon name="ribbon-outline"></ion-icon>
+          <span class="ac-text"><b>Membership application</b><small>Apply, or update your application details</small></span>
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+
         <div class="section-label">
           Basic information
           <button class="edit" (click)="toggleBasic()" [disabled]="savingBasic()">
@@ -231,6 +237,11 @@ import { BasicInfoDraft, basicToPatch, prefsToPatch, toMember } from '../api/api
         border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
         text-transform: none; letter-spacing: 0;
       }
+      .apply-cta { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; background: var(--vip-gold-tint, rgba(212,175,55,0.08)); border: 1px solid color-mix(in srgb, var(--vip-gold) 40%, transparent); border-radius: 14px; padding: 13px 14px; margin: 4px 0 18px; }
+      .apply-cta > ion-icon { color: var(--vip-gold); font-size: 22px; }
+      .apply-cta .ac-text { flex: 1; display: flex; flex-direction: column; }
+      .apply-cta .ac-text b { color: #fff; font-size: 14.5px; }
+      .apply-cta .ac-text small { color: var(--vip-muted); font-size: 12px; }
       .why { display: flex; gap: 8px; align-items: flex-start; color: var(--vip-muted); font-size: 12.5px; margin: 0 2px 10px; }
       .why ion-icon { font-size: 16px; color: var(--vip-gold); margin-top: 1px; }
 
@@ -367,6 +378,10 @@ export class ProfilePage {
       this.editing.set(false);
       await this.showToast('Preferences saved.', 'primary');
     }
+  }
+
+  openApplication(): void {
+    this.router.navigateByUrl('/apply');
   }
 
   logout(): void {

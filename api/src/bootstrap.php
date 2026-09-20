@@ -11,11 +11,13 @@ require __DIR__ . '/Db.php';
 require __DIR__ . '/Jwt.php';
 require __DIR__ . '/Response.php';
 require __DIR__ . '/Twilio.php';
+require __DIR__ . '/Stripe.php';
 require __DIR__ . '/routes/Auth.php';
 require __DIR__ . '/routes/Members.php';
 require __DIR__ . '/routes/Venues.php';
 require __DIR__ . '/routes/Jotform.php';
 require __DIR__ . '/routes/Admin.php';
+require __DIR__ . '/routes/Payments.php';
 
 function cfg(string $key, $default = null) {
   return $GLOBALS['CONFIG'][$key] ?? $default;

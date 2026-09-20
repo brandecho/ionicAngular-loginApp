@@ -35,6 +35,11 @@ try {
   if ($path === '/members/me' && $method === 'GET') Members::me();
   if ($path === '/members/me' && $method === 'PATCH') Members::update();
   if ($path === '/members/me/photo' && $method === 'POST') Members::photo();
+  if ($path === '/members/me/application' && $method === 'POST') Members::submitApplication();
+
+  // payments (Stripe — fast-track application fee)
+  if ($path === '/payments/application/checkout' && $method === 'POST') Payments::applicationCheckout();
+  if ($path === '/webhooks/stripe' && $method === 'POST') Payments::stripeWebhook();
 
   // venues
   if ($path === '/venues' && $method === 'GET') Venues::list();

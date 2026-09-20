@@ -12,6 +12,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/register.page').then((m) => m.RegisterPage),
   },
   {
+    path: 'apply',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/apply.page').then((m) => m.ApplyPage),
+  },
+  {
     path: 'inbox',
     loadComponent: () => import('./pages/inbox.page').then((m) => m.InboxPage),
   },

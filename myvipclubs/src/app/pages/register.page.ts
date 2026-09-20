@@ -239,7 +239,8 @@ export class RegisterPage {
         }
         const row = await this.api.me();
         this.vip.setCurrentMember(toMember(row));
-        this.router.navigateByUrl('/tabs/home');
+        // Quick sign-up done — send them straight to the membership application.
+        this.router.navigateByUrl('/apply');
       } catch (err) {
         await this.showError(this.registerErrorMessage(err));
       } finally {
