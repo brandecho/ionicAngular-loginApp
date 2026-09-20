@@ -6,9 +6,17 @@ require __DIR__ . '/../src/bootstrap.php';
 Response::cors();
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
-// normalize: strip a leading /api if present, trim slashes
-$path = preg_replace('#^/api#', '', $uri);
+$uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+
+// Work whether the app is served from the web root (docroot = public, the
+// production setup) or from a subfolder like /MyVIPClubs/api/public (handy for
+// local MAMP without changing the Document Root). Strip the folder index.php
+// lives in, then an optional leading /api.
+$scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+if ($scriptDir !== '' && str_starts_with($uriPath, $scriptDir)) {
+  $uriPath = substr($uriPath, strlen($scriptDir));
+}
+$path = preg_replace('#^/api#', '', $uriPath);
 $path = '/' . trim($path, '/');
 $seg = $path === '/' ? [] : explode('/', trim($path, '/'));
 
