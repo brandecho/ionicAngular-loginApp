@@ -69,7 +69,7 @@ type Step = 'choose' | 'form' | 'done';
             <button class="plan" (click)="pick('free')">
               <div class="ptop"><span class="pico">📝</span><span class="pprice free">Free</span></div>
               <h3>Full application</h3>
-              <p>The complete membership application. Tell us all about your tastes so venues can truly recognize you. Takes a few minutes.</p>
+              <p>The complete membership application. Tell us all about your preferences so venues can truly recognize you. Takes a few minutes.</p>
               <span class="go">Start free application <ion-icon name="chevron-forward-outline"></ion-icon></span>
             </button>
 
@@ -179,7 +179,7 @@ type Step = 'choose' | 'form' | 'done';
             }
 
             <!-- Preferences (both plans; short list for fast-track) -->
-            <div class="sec">Your VIP tastes</div>
+            <div class="sec">Your VIP preferences</div>
             <ion-list class="form" lines="full">
               <ion-item><ion-input label="Preferred beverages / cocktails" labelPlacement="stacked" [(ngModel)]="m.preferred_beverages"></ion-input></ion-item>
               <ion-item><ion-input label="Dietary restrictions / allergies" labelPlacement="stacked" [(ngModel)]="m.dietary_restrictions"></ion-input></ion-item>

@@ -71,7 +71,9 @@ import { BasicInfoDraft, basicToPatch, prefsToPatch, toMember } from '../api/api
           <span class="email">{{ vip.member().email }}</span>
           <div class="badges">
             <app-tier-badge [tier]="vip.currentTier()"></app-tier-badge>
-            <span class="ltv">{{ vip.lifetimeValue() | currency: 'USD' : 'symbol' : '1.0-0' }} lifetime</span>
+            @if (vip.lifetimeValue() > 0) {
+              <span class="ltv">{{ vip.lifetimeValue() | currency: 'USD' : 'symbol' : '1.0-0' }} lifetime</span>
+            }
           </div>
         </div>
 
