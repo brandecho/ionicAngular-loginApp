@@ -11,7 +11,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 -- ---------- accounts (login for every persona) ----------
 CREATE TABLE IF NOT EXISTS accounts (
-  id            CHAR(36)      NOT NULL DEFAULT (UUID()),
+  id            CHAR(36)      NOT NULL,
   role          ENUM('member','owner','manager','staff','admin') NOT NULL,
   name          VARCHAR(160)  NOT NULL,
   email         VARCHAR(190)  NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 
 -- ---------- members (VIP profile == membership application) ----------
 CREATE TABLE IF NOT EXISTS members (
-  id                       CHAR(36)     NOT NULL DEFAULT (UUID()),
+  id                       CHAR(36)     NOT NULL,
   account_id               CHAR(36)     NULL,
   vip_number               VARCHAR(24)  NULL,
 
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS members (
 
 -- ---------- venues ----------
 CREATE TABLE IF NOT EXISTS venues (
-  id               CHAR(36)     NOT NULL DEFAULT (UUID()),
+  id               CHAR(36)     NOT NULL,
   name             VARCHAR(160) NOT NULL,
   type             VARCHAR(60)  NULL,
   address          VARCHAR(255) NULL,
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS venues (
 
 -- ---------- staff memberships (staff <-> venue, needs approval) ----------
 CREATE TABLE IF NOT EXISTS staff_memberships (
-  id            CHAR(36)     NOT NULL DEFAULT (UUID()),
+  id            CHAR(36)     NOT NULL,
   account_id    CHAR(36)     NOT NULL,
   venue_id      CHAR(36)     NOT NULL,
   name          VARCHAR(160) NOT NULL,
@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS member_venue_access (
 
 -- ---------- venue access requests (member asks for the hookup) ----------
 CREATE TABLE IF NOT EXISTS venue_requests (
-  id            CHAR(36)   NOT NULL DEFAULT (UUID()),
+  id            CHAR(36)   NOT NULL,
   member_id     CHAR(36)   NOT NULL,
   venue_id      CHAR(36)   NOT NULL,
   status        ENUM('requested','in_review','approved','declined') NOT NULL DEFAULT 'requested',
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS venue_requests (
 
 -- ---------- notifications (in-app inbox) ----------
 CREATE TABLE IF NOT EXISTS notifications (
-  id            CHAR(36)   NOT NULL DEFAULT (UUID()),
+  id            CHAR(36)   NOT NULL,
   audience_kind ENUM('account','venue','role') NOT NULL,
   audience_id   VARCHAR(64) NOT NULL,          -- account id / venue id / role name
   type          VARCHAR(48) NOT NULL,
@@ -185,7 +185,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 -- ---------- sms outbox (Twilio send log) ----------
 CREATE TABLE IF NOT EXISTS sms_outbox (
-  id            CHAR(36)   NOT NULL DEFAULT (UUID()),
+  id            CHAR(36)   NOT NULL,
   to_phone      VARCHAR(32) NOT NULL,
   body          VARCHAR(640) NOT NULL,
   related_type  VARCHAR(48) NULL,
