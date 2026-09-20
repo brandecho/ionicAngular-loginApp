@@ -382,6 +382,19 @@ export class ProfilePage {
     }
   }
 
+  /** Re-pull the live member every time the Profile screen is opened, so
+   *  changes made in the admin panel (e.g. tier/level) show up without a
+   *  fresh login. */
+  async ionViewWillEnter(): Promise<void> {
+    if (!this.api.isLoggedIn() || this.editing() || this.editingBasic()) return;
+    try {
+      const row = await this.api.me();
+      this.vip.setCurrentMember(toMember(row));
+    } catch {
+      /* offline / not reachable — keep what we have */
+    }
+  }
+
   openApplication(): void {
     this.router.navigateByUrl('/apply');
   }
