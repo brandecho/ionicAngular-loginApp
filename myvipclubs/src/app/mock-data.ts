@@ -5,7 +5,7 @@ export const TIERS: Tier[] = [
     id: 'silver',
     name: 'Silver',
     threshold: 0,
-    color: '#c4c7d0',
+    color: '#9fa7b5', // muted steel — distinct from platinum
     tagline: 'Welcome to the list',
     perks: ['Skip-the-line at partner venues', 'Member pricing on bottle service', 'Birthday welcome drink'],
   },
@@ -21,7 +21,7 @@ export const TIERS: Tier[] = [
     id: 'platinum',
     name: 'Platinum',
     threshold: 15000,
-    color: '#cfd8e6',
+    color: '#e7eefb', // bright icy white — clearly brighter than silver
     tagline: 'The manager greets you by name',
     perks: ['Guaranteed table on arrival', 'Personal host at every venue', 'Early access to events & guest lists', 'Comp welcome bottle'],
   },
@@ -29,17 +29,19 @@ export const TIERS: Tier[] = [
     id: 'black',
     name: 'Black',
     threshold: 40000,
-    color: '#2a2a34',
+    color: '#17171d', // filled black badge with white text (see `solid`)
+    solid: true,
+    ink: '#f2f3f8',
     tagline: 'Doors open before you arrive',
     perks: ['Dedicated concierge line', 'Off-menu & after-hours access', 'Private entrance where available', 'Curated experiences on request'],
   },
   {
-    id: 'noir',
-    name: 'Noir',
+    id: 'noir', // internal id kept for the database; displayed as "Copper"
+    name: 'Copper',
     threshold: 100000,
-    color: '#0f0f16',
+    color: '#c07a3e', // warm copper — the top tier
     tagline: 'The room is ready for you',
-    perks: ['24/7 personal concierge', 'Anything, anywhere access', 'Private events & venue buyouts', 'Invitation-only Noir circle'],
+    perks: ['24/7 personal concierge', 'Anything, anywhere access', 'Private events & venue buyouts', 'Invitation-only Copper circle'],
   },
 ];
 

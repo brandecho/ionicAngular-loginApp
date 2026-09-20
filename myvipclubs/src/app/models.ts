@@ -7,6 +7,11 @@ export interface Tier {
   threshold: number;
   /** Accent color for the tier badge/card. */
   color: string;
+  /** When true, the badge is filled with `color` and text uses `ink`
+   *  (for very dark tiers like Black that can't be shown as colored text). */
+  solid?: boolean;
+  /** Text color used when `solid` is true. */
+  ink?: string;
   tagline: string;
   perks: string[];
 }

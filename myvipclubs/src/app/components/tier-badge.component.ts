@@ -7,7 +7,12 @@ import { Tier } from '../models';
   standalone: true,
   imports: [IonIcon],
   template: `
-    <span class="badge" [style.--tier-color]="tier.color">
+    <span
+      class="badge"
+      [class.solid]="tier.solid"
+      [style.--tier-color]="tier.color"
+      [style.--tier-ink]="tier.ink || tier.color"
+    >
       <ion-icon name="diamond"></ion-icon>
       {{ tier.name }}
     </span>
@@ -27,6 +32,12 @@ import { Tier } from '../models';
         color: var(--tier-color, var(--vip-gold));
         border: 1px solid var(--tier-color, var(--vip-gold));
         background: color-mix(in srgb, var(--tier-color, #d4af37) 14%, transparent);
+      }
+      /* Filled style for very dark tiers (e.g. Black) so text stays legible. */
+      .badge.solid {
+        color: var(--tier-ink, #fff);
+        background: var(--tier-color);
+        border-color: color-mix(in srgb, var(--tier-ink, #fff) 45%, var(--tier-color));
       }
       ion-icon {
         font-size: 13px;
